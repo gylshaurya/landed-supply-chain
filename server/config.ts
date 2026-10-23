@@ -5,6 +5,8 @@ const env = process.env;
 export const config = {
   port: Number(env.PORT || 8787),
   anthropicKey: env.ANTHROPIC_API_KEY || '',
+  /** Needed only when the API key is not scoped to a workspace */
+  anthropicWorkspace: env.ANTHROPIC_WORKSPACE_ID || '',
   model: env.LANDED_MODEL || 'claude-opus-5-5',
   paypal: {
     clientId: env.PAYPAL_CLIENT_ID || '',

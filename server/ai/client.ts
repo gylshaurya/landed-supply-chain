@@ -5,7 +5,12 @@ import { config } from '../config.js';
 
 let client: Anthropic | null = null;
 export function anthropic(): Anthropic {
-  if (!client) client = new Anthropic({ apiKey: config.anthropicKey });
+  if (!client) {
+    client = new Anthropic({
+      apiKey: config.anthropicKey,
+      defaultHeaders: config.anthropicWorkspace ? { 'anthropic-workspace-id': config.anthropicWorkspace } : undefined,
+    });
+  }
   return client;
 }
 
