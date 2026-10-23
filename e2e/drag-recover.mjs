@@ -1,0 +1,17 @@
+import { chromium } from '@playwright/test';
+const base = 'http://localhost:5173';
+await fetch(`${base}/api/admin/reset`, { method: 'POST' });
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+await p.goto(`${base}/timeline`, { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+const bar = p.locator('[data-task-id="1042-qc"] .b-gantt-task').first();
+const box = await bar.boundingBox();
+await p.mouse.move(box.x + box.width - 2, box.y + box.height / 2); await p.mouse.down();
+await p.mouse.move(box.x + box.width + 70, box.y + box.height / 2, { steps: 15 }); await p.mouse.up();
+await p.waitForTimeout(2000);
+await p.goto(`${base}/`, { waitUntil: 'networkidle' }); await p.waitForTimeout(1200);
+await p.screenshot({ path: 'e2e/shots/risk.png' });
+await p.getByRole('button', { name: /Ask the recovery agent/ }).click();
+await p.getByRole('button', { name: /Review recovery plan/ }).waitFor({ timeout: 240000 });
+await p.screenshot({ path: 'e2e/shots/risk-agent.png' });
+console.log('ok');
+await b.close();

@@ -1,0 +1,22 @@
+# One-click deploy on Render (Blueprint). Set the secret env vars in the dashboard.
+services:
+  - type: web
+    name: landed
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/state
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: LANDED_TODAY
+        value: 2026-10-23
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_SUPPLIER_EMAIL
+        sync: false

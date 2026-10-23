@@ -1,0 +1,48 @@
+{
+  "name": "landed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Landed - a self-healing supply chain for online stores, built on PayPal + Bryntum + Claude",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch --clear-screen=false server/index.ts",
+    "dev:web": "vite",
+    "build": "vite build",
+    "start": "NODE_ENV=production tsx server/index.ts",
+    "seed": "tsx server/scripts/seed.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "@bryntum/gantt": "npm:@bryntum/gantt-trial@^7.3.7",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "nanoid": "^5.1.16",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.6",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "tsx": "^4.23.15",
+    "vite": "^7.3.7",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^20.19.0",
+    "concurrently": "^10.0.6",
+    "vitest": "^3.2.7",
+    "@playwright/test": "^1.64.1"
+  }
+}
