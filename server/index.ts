@@ -29,6 +29,22 @@ const upload = multer({
 });
 app.use('/uploads', express.static(uploadDir));
 
+// Simple per-IP budget for endpoints that call Claude, so a public demo can't run up the bill.
+const AI_LIMIT = Number(process.env.LANDED_AI_LIMIT_PER_HOUR || 40);
+const aiHits = new Map<string, number[]>();
+function aiBudget(req: Request, res: Response, next: NextFunction) {
+  const ip = String(req.headers['x-forwarded-for'] ?? req.ip ?? 'local').split(',')[0].trim();
+  const now = Date.now();
+  const hits = (aiHits.get(ip) ?? []).filter(t => now - t < 3_600_000);
+  if (hits.length >= AI_LIMIT) {
+    res.status(429).json({ success: false, error: 'Demo AI budget reached for this hour — try again later.' });
+    return;
+  }
+  hits.push(now);
+  aiHits.set(ip, hits);
+  next();
+}
+
 type Handler = (req: Request, res: Response) => Promise<unknown> | unknown;
 const h = (fn: Handler) => async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -109,7 +125,7 @@ app.post('/api/simulate', h(req => {
 }));
 
 // ---------------------------------------------------------------- supplier portal
-app.post('/api/supplier/:poId/update', h(async req => {
+app.post('/api/supplier/:poId/update', aiBudget, h(async req => {
   const message = String(req.body?.message ?? '').trim();
   if (!message) throw Object.assign(new Error('Message is required'), { status: 400 });
   const poId = String(req.params.poId);
@@ -120,13 +136,13 @@ app.post('/api/supplier/:poId/update', h(async req => {
   return { accepted: true };
 }));
 
-app.post('/api/recover/:poId', h(req => {
+app.post('/api/recover/:poId', aiBudget, h(req => {
   const poId = String(req.params.poId);
   svc.recoverFromPlanChange(poId).catch(err => bus.emit('agent', { kind: 'error', text: `Agent error: ${(err as Error).message}` }));
   return { accepted: true };
 }));
 
-app.post('/api/supplier/:poId/qc', upload.array('photos', 6), h(async req => {
+app.post('/api/supplier/:poId/qc', aiBudget, upload.array('photos', 6), h(async req => {
   const files = (req.files as Express.Multer.File[] | undefined) ?? [];
   const samples: string[] = Array.isArray(req.body?.samples) ? req.body.samples : req.body?.samples ? [req.body.samples] : [];
   const photoPaths: string[] = [];
@@ -186,7 +202,7 @@ app.get('/api/notice/:token', h(req => {
 app.post('/api/notice/:token', h(async req => svc.respondToNotice(String(req.params.token), req.body.choice === 'cancel' ? 'cancel' : 'keep')));
 
 // ---------------------------------------------------------------- PO intake
-app.post('/api/intake/read', upload.single('file'), h(async req => {
+app.post('/api/intake/read', aiBudget, upload.single('file'), h(async req => {
   const file = req.file;
   const sample = req.body?.sample ? path.resolve('public/samples', path.basename(String(req.body.sample))) : null;
   const pdfPath = file?.path ?? (sample && fs.existsSync(sample) ? sample : null);
@@ -199,7 +215,7 @@ app.post('/api/intake/read', upload.single('file'), h(async req => {
 app.post('/api/intake/commit', h(req => svc.commitIntake(req.body as Intake)));
 
 // ---------------------------------------------------------------- Bryntum AI (Copilot) → Claude
-app.post('/api/ai/bryntum', h(req => bryntumPrompt(req.body)));
+app.post('/api/ai/bryntum', aiBudget, h(req => bryntumPrompt(req.body)));
 app.get('/api/ai/models', h(() => ({ success: true, data: [{ id: config.model, name: 'Claude (Landed Copilot)' }] })));
 
 // ---------------------------------------------------------------- admin
