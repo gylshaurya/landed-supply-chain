@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import type Anthropic from '@anthropic-ai/sdk';
 import { aiMode, today } from '../config.js';
-import { structured } from './client.js';
+import { structured, type InputPart } from './llm.js';
 
 // Reads a purchase order (PDF or pasted text) and drafts the supply-chain plan.
 
@@ -56,8 +55,8 @@ export async function readPurchaseOrder(input: { pdfBase64?: string; text?: stri
     const { demoIntake } = await import('./intakeFixture.js');
     return { ...demoIntake(), source: 'demo' };
   }
-  const content: Anthropic.Beta.BetaContentBlockParam[] = [];
-  if (input.pdfBase64) content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: input.pdfBase64 } });
+  const content: InputPart[] = [];
+  if (input.pdfBase64) content.push({ type: 'pdf', data: input.pdfBase64 });
   content.push({ type: 'text', text: `${input.text ? `Purchase order text:\n"""${input.text}"""\n\n` : ''}Today is ${today()}. Extract the PO and draft the plan.` });
   const out = await structured({ schema: IntakeSchema, system: SYSTEM, content, effort: 'medium' });
   return { ...out, source: 'live' };

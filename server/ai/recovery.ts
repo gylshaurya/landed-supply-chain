@@ -1,12 +1,11 @@
-import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { aiMode, config, today } from '../config.js';
+import { aiMode, today } from '../config.js';
 import { fmt } from '../dates.js';
 import { bus } from '../bus.js';
 import { BLACK_FRIDAY } from '../seed/data.js';
 import { AIR_CAPACITY, bestOption, evaluateScenario, scheduled, suggestedAirUnits } from '../sim.js';
 import type { DB, OptionResult, Proposal } from '../types.js';
-import { anthropic, AIRefusal, FALLBACK, structured } from './client.js';
+import { runToolAgent, structured, tool } from './llm.js';
 import { demoSupplierUpdate, demoRecovery } from './fixtures.js';
 import { enforceCompliance, ftcChecks } from './notice.js';
 
@@ -66,6 +65,7 @@ A supplier delay just broke the plan. Your job: find the response that protects 
 
 How to work:
 - Call get_situation first.
+- You may call simulate_option several times in one turn to compare options side by side.
 - Explore with simulate_option. Always simulate "Wait it out" (no action) as the reference. If the supplier offered paid overtime, try it alone and combined with air freight. Air cargo space is limited, so try a few air quantities up to the cap — numbers beat intuition. Try a goodwill credit of $5 only if customers will still be late.
 - Compare on total impact (lost revenue + expected refunds + extra costs + broken-promise cost, i.e. support load and PayPal item-not-received dispute risk). Also weigh hitting Black Friday and the number of customers who get a broken promise.
 - The FTC Mail Order Rule requires that customers whose promised date slips get a notice with the revised date and a free option to cancel for a full refund. Write that notice as a template with the required placeholders. Do not promise anything the plan does not deliver.
@@ -106,10 +106,10 @@ export async function runRecoveryAgent(
   }
 
   const tools = [
-    betaZodTool({
+    tool({
       name: 'get_situation',
       description: 'Current plan, the delay event, pre-orders, demand and key dates for the affected purchase order.',
-      inputSchema: z.object({}),
+      schema: z.object({}),
       run: async () => {
         const preUnits = db.preorders.filter(p => p.productId === product.id && (p.status === 'active' || p.status === 'kept')).reduce((s, p) => s + p.qty, 0);
         const out = {
@@ -127,11 +127,11 @@ export async function runRecoveryAgent(
         return JSON.stringify(out);
       },
     }),
-    betaZodTool({
+    tool({
       name: 'simulate_option',
       description: 'Re-run the schedule engine and demand model for one recovery option. Returns ship dates, late pre-orders, lost revenue, expected refunds, costs and total impact in USD.',
-      inputSchema: z.object({
-        label: z.string().describe('short human label, e.g. "Air-freight 320 units"'),
+      schema: z.object({
+        label: z.string().describe('short human label, e.g. "Air-freight 120 units"'),
         useSupplierOvertime: z.boolean().describe('accept the supplier overtime offer (if one exists)'),
         airUnits: z.number().int().min(0).max(AIR_CAPACITY).describe(`units to split off and send by air (max ${AIR_CAPACITY}: confirmed cargo space)`),
         goodwillCredit: z.number().min(0).max(20).describe('USD refunded to each late customer who keeps their order'),
@@ -146,10 +146,10 @@ export async function runRecoveryAgent(
         return JSON.stringify({ ...r, increaseVsOriginalPlan: r.totalImpact - baseline.totalImpact });
       },
     }),
-    betaZodTool({
+    tool({
       name: 'submit_plan',
       description: 'Submit the final recommendation. Call once, after simulating.',
-      inputSchema: SubmitSchema,
+      schema: SubmitSchema,
       run: async input => {
         if (!results.has(input.recommendedLabel)) return `Error: no simulated option labelled "${input.recommendedLabel}". Use one of: ${[...results.keys()].join(', ')}`;
         submitted = input;
@@ -160,20 +160,13 @@ export async function runRecoveryAgent(
   ];
 
   let submitted: z.infer<typeof SubmitSchema> | null = null;
-  const runner = anthropic().beta.messages.toolRunner({
-    model: config.model,
-    max_tokens: 16000,
-    max_iterations: 16,
+  await runToolAgent({
     system: SYSTEM,
-    output_config: { effort: 'medium' },
+    prompt: `New supplier update for ${poId}: "${update.message}". Work out the best recovery and submit it.`,
     tools,
-    messages: [{ role: 'user', content: `New supplier update for ${poId}: "${update.message}". Work out the best recovery and submit it.` }],
-    ...FALLBACK,
+    maxIterations: 16,
+    isDone: () => submitted !== null,
   });
-  for await (const message of runner) {
-    if (message.stop_reason === 'refusal') throw new AIRefusal('The recovery agent declined this request.');
-    if (submitted) break;
-  }
   if (!submitted) throw new Error('Recovery agent finished without submitting a plan');
   return finalize(db, poId, update, baseline.firstShipDate, results, submitted, trace, 'live');
 }

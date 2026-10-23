@@ -120,7 +120,7 @@ export function demoQc(photos: string[]): Omit<QcReport, 'id' | 'poId' | 'create
   return {
     verdict: 'needs_review',
     confidence: 0.4,
-    summary: 'Demo mode can only grade the bundled sample photos. Add an ANTHROPIC_API_KEY for live vision inspection.',
+    summary: 'Demo mode can only grade the bundled sample photos. Add a GEMINI_API_KEY (free) for live vision inspection.',
     checks: [],
     defects: [],
     estimatedDefectRatePct: 0,

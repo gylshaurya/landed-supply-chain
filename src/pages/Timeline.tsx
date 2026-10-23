@@ -51,6 +51,7 @@ export function Timeline() {
         blackFriday={state.blackFriday}
         promise={state.kpis.heroPromise}
         aiModel={state.modes.model}
+        aiProvider={state.modes.provider}
         aiLive={state.modes.ai === 'live'}
       />
     </>

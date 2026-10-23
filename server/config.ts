@@ -8,6 +8,9 @@ export const config = {
   /** Needed only when the API key is not scoped to a workspace */
   anthropicWorkspace: env.ANTHROPIC_WORKSPACE_ID || '',
   model: env.LANDED_MODEL || 'claude-opus-5-5',
+  geminiKey: env.GEMINI_API_KEY || '',
+  geminiModel: env.GEMINI_MODEL || 'gemini-flash-latest',
+  provider: (env.LANDED_AI_PROVIDER || '').toLowerCase(),
   paypal: {
     clientId: env.PAYPAL_CLIENT_ID || '',
     clientSecret: env.PAYPAL_CLIENT_SECRET || '',
@@ -19,7 +22,15 @@ export const config = {
   publicUrl: env.PUBLIC_URL || '',
 };
 
-export const aiMode = (): 'live' | 'demo' => (config.anthropicKey ? 'live' : 'demo');
+/** Gemini (free tier) is preferred when its key is set; Claude is also supported. */
+export const aiProvider = (): 'gemini' | 'anthropic' | 'none' => {
+  if (config.provider === 'anthropic' && config.anthropicKey) return 'anthropic';
+  if (config.provider === 'gemini' && config.geminiKey) return 'gemini';
+  if (config.geminiKey) return 'gemini';
+  if (config.anthropicKey) return 'anthropic';
+  return 'none';
+};
+export const aiMode = (): 'live' | 'demo' => (aiProvider() === 'none' ? 'demo' : 'live');
 export const paypalMode = (): 'sandbox' | 'simulated' =>
   config.paypal.clientId && config.paypal.clientSecret ? 'sandbox' : 'simulated';
 

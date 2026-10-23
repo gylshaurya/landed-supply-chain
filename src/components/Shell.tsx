@@ -74,8 +74,8 @@ export function Shell() {
 export function ModeBadges({ modes }: { modes: any }) {
   return (
     <div className="row">
-      <span className={`badge ${modes.ai === 'live' ? 'violet' : 'amber'}`} title={modes.ai === 'live' ? `Agents run on ${modes.model}` : 'No ANTHROPIC_API_KEY: agents use recorded demo responses'}>
-        <i className="fa fa-wand-magic-sparkles" /> {modes.ai === 'live' ? `Claude · ${modes.model}` : 'Demo AI'}
+      <span className={`badge ${modes.ai === 'live' ? 'violet' : 'amber'}`} title={modes.ai === 'live' ? `Agents run on ${modes.model}` : 'No AI key: agents use recorded demo responses'}>
+        <i className="fa fa-wand-magic-sparkles" /> {modes.ai === 'live' ? `${modes.provider === 'gemini' ? 'Gemini' : 'Claude'} · ${modes.model}` : 'Demo AI'}
       </span>
       <span className={`badge ${modes.paypal === 'sandbox' ? 'blue' : 'amber'}`} title={modes.paypal === 'sandbox' ? 'Live calls to the PayPal sandbox' : 'No PayPal credentials: calls are simulated'}>
         <i className="fa fa-circle-dollar-to-slot" /> {modes.paypal === 'sandbox' ? 'PayPal sandbox' : 'PayPal simulated'}

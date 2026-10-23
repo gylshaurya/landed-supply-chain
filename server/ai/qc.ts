@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { aiMode } from '../config.js';
 import type { PurchaseOrder, QcReport } from '../types.js';
-import { structured } from './client.js';
+import { structured, type InputPart } from './llm.js';
 import { demoQc } from './fixtures.js';
 
 const QcSchema = z.object({
@@ -32,15 +31,15 @@ const MEDIA: Record<string, 'image/png' | 'image/jpeg' | 'image/webp' | 'image/g
   '.gif': 'image/gif',
 };
 
-function imageBlock(file: string): Anthropic.Beta.BetaImageBlockParam {
+function imageBlock(file: string): InputPart {
   const ext = path.extname(file).toLowerCase();
-  return { type: 'image', source: { type: 'base64', media_type: MEDIA[ext] ?? 'image/png', data: fs.readFileSync(file).toString('base64') } };
+  return { type: 'image', mimeType: MEDIA[ext] ?? 'image/png', data: fs.readFileSync(file).toString('base64') };
 }
 
 /** Vision inspection of factory photos against the PO spec and a golden sample. */
 export async function inspect(po: PurchaseOrder, photoFiles: string[], referenceFile?: string) {
   if (aiMode() === 'demo') return { ...demoQc(photoFiles.map(f => path.basename(f))), source: 'demo' as const };
-  const content: Anthropic.Beta.BetaContentBlockParam[] = [];
+  const content: InputPart[] = [];
   if (referenceFile && fs.existsSync(referenceFile)) {
     content.push({ type: 'text', text: 'APPROVED GOLDEN SAMPLE (reference):' }, imageBlock(referenceFile));
   }

@@ -1,5 +1,5 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
-import { AIHelper, AnthropicPlugin, DateHelper, Gantt, StringHelper, TaskModel } from '@bryntum/gantt';
+import { AIHelper, AnthropicPlugin, DateHelper, Gantt, GooglePlugin, StringHelper, TaskModel } from '@bryntum/gantt';
 import { api, usd } from '../lib/api';
 import { useApp } from '../lib/store';
 import { toast } from './Toast';
@@ -32,6 +32,7 @@ interface Props {
   blackFriday: string;
   promise?: string;
   aiModel?: string;
+  aiProvider?: string;
   aiLive?: boolean;
   onReady?: (g: Gantt) => void;
 }
@@ -152,12 +153,12 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
           ? {
               ai: {
                 promptUrl: '/api/ai/bryntum',
-                apiPlugin: AnthropicPlugin,
+                apiPlugin: props.aiProvider === 'gemini' ? GooglePlugin : AnthropicPlugin,
                 model: props.aiModel,
                 requireConfirmationOnRemovals: true,
                 showNoConnectionIcon: false,
                 chatButton: {
-                  tooltip: 'Landed Copilot (Bryntum AI + Claude)',
+                  tooltip: 'Landed Copilot (Bryntum AI)',
                   chatPanel: {
                     title: 'Landed Copilot',
                     intro: { html: 'Ask about the plan, move tasks, or run a what-if. I can see every PayPal payment milestone.' },
@@ -209,7 +210,7 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
     };
     // Re-create only when the data source changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.loadUrl, props.editable, props.aiLive]);
+  }, [props.loadUrl, props.editable, props.aiLive, props.aiProvider]);
 
   // Live updates from agents / other tabs.
   useEffect(() => {

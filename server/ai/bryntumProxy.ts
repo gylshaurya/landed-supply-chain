@@ -1,4 +1,4 @@
-import { aiMode, config } from '../config.js';
+import { aiMode, aiProvider, config } from '../config.js';
 import { anthropic, FALLBACK } from './client.js';
 
 // Backend for Bryntum's built-in AI feature (AnthropicPlugin). The plugin sends
@@ -15,14 +15,31 @@ export async function bryntumPrompt(body: Body) {
       role: 'assistant',
       model: config.model,
       stop_reason: 'end_turn',
-      content: [{ type: 'text', text: 'The Copilot needs an ANTHROPIC_API_KEY to edit the schedule. Everything else in Landed works in demo mode.' }],
+      content: [{ type: 'text', text: 'The Copilot needs a GEMINI_API_KEY (free) or ANTHROPIC_API_KEY to edit the schedule. Everything else in Landed works in demo mode.' }],
       usage: { input_tokens: 0, output_tokens: 0 },
     };
   }
+  if (aiProvider() === 'gemini') return geminiPrompt(body);
   const { temperature: _t, top_p: _p, top_k: _k, stream: _s, model: _m, thinking: _th, ...rest } = body;
   const params = { ...rest, model: config.model, max_tokens: Math.max(Number(rest.max_tokens ?? 0), 8000), output_config: { effort: 'low' as const } } as Body;
   if (params.tool_choice && (params.tool_choice.type === 'any' || params.tool_choice.type === 'tool')) params.tool_choice = { type: 'auto' };
   const request = { ...params, cache_control: { type: 'ephemeral' }, ...FALLBACK } as unknown as Parameters<ReturnType<typeof anthropic>['beta']['messages']['create']>[0];
   const msg = await anthropic().beta.messages.create({ ...request, stream: false });
   return msg;
+}
+
+/** Bryntum's GooglePlugin sends a Gemini REST generateContent body; forward it with the server-held key. */
+async function geminiPrompt(body: Body) {
+  const { model: _m, stream: _s, ...rest } = body;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.geminiModel)}:generateContent`;
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.geminiKey }, body: JSON.stringify(rest) });
+    const json = await res.json();
+    if (res.ok) return json;
+    if ((res.status === 429 || res.status === 503) && attempt < 3) {
+      await new Promise(r => setTimeout(r, 5000 * (attempt + 1)));
+      continue;
+    }
+    throw Object.assign(new Error(json?.error?.message ?? `Gemini error ${res.status}`), { status: res.status });
+  }
 }

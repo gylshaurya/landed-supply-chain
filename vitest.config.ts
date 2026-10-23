@@ -7,6 +7,7 @@ export default defineConfig({
       LANDED_DB: 'data/test-db.json',
       LANDED_TODAY: '2026-10-23',
       ANTHROPIC_API_KEY: '',
+      GEMINI_API_KEY: '',
       PAYPAL_CLIENT_ID: '',
       PAYPAL_CLIENT_SECRET: '',
     },

@@ -22,6 +22,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",
     "@bryntum/gantt": "npm:@bryntum/gantt-trial@^7.3.7",
+    "@google/genai": "^2.31.0",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
     "multer": "^2.5.0",
@@ -32,17 +33,17 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "typescript": "~5.9.3",
-    "tsx": "^4.23.15",
-    "vite": "^7.3.7",
-    "@vitejs/plugin-react": "^5.2.0",
-    "@types/react": "^18.3.31",
-    "@types/react-dom": "^18.3.7",
+    "@playwright/test": "^1.64.1",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.3.0",
     "@types/node": "^20.19.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.2.0",
     "concurrently": "^10.0.6",
-    "vitest": "^3.2.7",
-    "@playwright/test": "^1.64.1"
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.7",
+    "vitest": "^3.2.7"
   }
 }

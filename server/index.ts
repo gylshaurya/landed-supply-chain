@@ -216,7 +216,7 @@ app.post('/api/intake/commit', h(req => svc.commitIntake(req.body as Intake)));
 
 // ---------------------------------------------------------------- Bryntum AI (Copilot) → Claude
 app.post('/api/ai/bryntum', aiBudget, h(req => bryntumPrompt(req.body)));
-app.get('/api/ai/models', h(() => ({ success: true, data: [{ id: config.model, name: 'Claude (Landed Copilot)' }] })));
+app.get('/api/ai/models', h(() => ({ success: true, data: [{ id: svc.modes().model, name: 'Landed Copilot' }] })));
 
 // ---------------------------------------------------------------- admin
 app.post('/api/admin/reset', h(() => {
@@ -243,6 +243,6 @@ if (!process.env.VITEST) {
   getDb();
   app.listen(config.port, () => {
     const m = svc.modes();
-    console.log(`Landed API on http://localhost:${config.port} · AI: ${m.ai} (${m.model}) · PayPal: ${m.paypal} · today=${m.today} · next arrival check ${addDays(m.today, 0)}`);
+    console.log(`Landed API on http://localhost:${config.port} · AI: ${m.ai} (${m.provider} ${m.model}) · PayPal: ${m.paypal} · today=${m.today} · next arrival check ${addDays(m.today, 0)}`);
   });
 }

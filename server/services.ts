@@ -1,5 +1,6 @@
 import path from 'node:path';
-import { aiMode, config, paypalMode, today } from './config.js';
+import { aiMode, aiProvider, config, paypalMode, today } from './config.js';
+import { modelName } from './ai/llm.js';
 import { addDays, fmt, fmtLong } from './dates.js';
 import { bus } from './bus.js';
 import { getDb, log, newId, save } from './db.js';
@@ -466,5 +467,5 @@ function maxDateStr(a: string, b: string) {
 }
 
 export function modes() {
-  return { ai: aiMode(), paypal: paypalMode(), model: config.model, today: today() };
+  return { ai: aiMode(), provider: aiProvider(), paypal: paypalMode(), model: modelName(), today: today() };
 }
