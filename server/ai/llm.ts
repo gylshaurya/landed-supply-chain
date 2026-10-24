@@ -34,6 +34,17 @@ export function modelName() {
 }
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+/** Remember a model that just worked after the primary failed, so the next calls skip the wait. */
+let healthy: { model: string; until: number } | null = null;
+export function geminiChain(): string[] {
+  const all = [config.geminiModel, ...config.geminiFallbacks.filter(m => m !== config.geminiModel)];
+  if (healthy && healthy.until > Date.now()) return [healthy.model, ...all.filter(m => m !== healthy!.model)];
+  return all;
+}
+export function markHealthy(model: string) {
+  healthy = model === config.geminiModel ? null : { model, until: Date.now() + 10 * 60_000 };
+}
 const retryable = (e: unknown) => {
   const status = e instanceof ApiError ? e.status : 0;
   return status === 429 || status === 500 || status === 503 || status === 504 || /timed? ?out|aborted|fetch failed/i.test(String((e as Error)?.message));
@@ -46,14 +57,17 @@ const retryable = (e: unknown) => {
  * agent so a conversation stays on one model once it has started.
  */
 async function generate(params: Omit<Parameters<GoogleGenAI['models']['generateContent']>[0], 'model'>, label: string, session: { model?: string; started?: boolean } = {}) {
-  const chain = session.model ? [session.model] : [config.geminiModel, ...config.geminiFallbacks.filter(m => m !== config.geminiModel)];
+  const chain = session.model ? [session.model] : geminiChain();
   let lastError: unknown;
   for (const model of chain) {
     const attempts = session.started ? 6 : 2;
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
         const res = await geminiClient().models.generateContent({ ...params, model, config: { ...params.config, httpOptions: { timeout: 90_000 } } });
-        if (!session.model) console.log(`[gemini] ${label} → ${model}`);
+        if (!session.model) {
+          console.log(`[gemini] ${label} → ${model}`);
+          markHealthy(model);
+        }
         session.model = model;
         session.started = true;
         return res;

@@ -1,5 +1,6 @@
 import { aiMode, aiProvider, config } from '../config.js';
 import { anthropic, FALLBACK } from './client.js';
+import { geminiChain, markHealthy } from './llm.js';
 
 // Backend for Bryntum's built-in AI feature (AnthropicPlugin). The plugin sends
 // a Messages API body; we pin the model, strip parameters the current model
@@ -31,14 +32,17 @@ export async function bryntumPrompt(body: Body) {
 /** Bryntum's GooglePlugin sends a Gemini REST generateContent body; forward it with the server-held key. */
 async function geminiPrompt(body: Body) {
   const { model: _m, stream: _s, ...rest } = body;
-  const models = [config.geminiModel, ...config.geminiFallbacks.filter(m => m !== config.geminiModel)];
+  const models = geminiChain();
   let last: { status: number; message: string } = { status: 500, message: 'Gemini unavailable' };
   for (const model of models) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
     for (let attempt = 0; attempt < 2; attempt++) {
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.geminiKey }, body: JSON.stringify(rest), signal: AbortSignal.timeout(60_000) });
       const json = await res.json();
-      if (res.ok) return json;
+      if (res.ok) {
+        markHealthy(model);
+        return json;
+      }
       last = { status: res.status, message: json?.error?.message ?? `Gemini error ${res.status}` };
       if (!(res.status === 429 || res.status === 503)) throw Object.assign(new Error(last.message), { status: res.status });
       await new Promise(r => setTimeout(r, 2500 * (attempt + 1)));
