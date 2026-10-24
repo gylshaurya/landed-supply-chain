@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, usd } from '../lib/api';
 import { toast } from '../components/Toast';
+import { Icon } from '../components/Icon';
 
 export function Intake() {
   const nav = useNavigate();
@@ -52,9 +53,9 @@ export function Intake() {
             <label className="f">…or paste the PO text<textarea className="input" value={text} onChange={e => setText(e.target.value)} placeholder="PO number, supplier, quantity, unit cost, payment terms, lead time, incoterm…" /></label>
             <div className="row">
               <button className="btn primary" disabled={!!busy || (!file && !text.trim())} onClick={() => read(false)}>
-                {busy === 'read' ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-wand-magic-sparkles" />} Read & plan
+                {busy === 'read' ? <Icon name="spinner" spin /> : <Icon name="sparkles" />} Read & plan
               </button>
-              <button className="btn" disabled={!!busy} onClick={() => read(true)}><i className="fa fa-file-pdf" /> Use sample PO-1045.pdf</button>
+              <button className="btn" disabled={!!busy} onClick={() => read(true)}><Icon name="file" /> Use sample PO-1045.pdf</button>
               <a className="btn ghost sm" href="/samples/PO-1045.pdf" target="_blank" rel="noreferrer">view sample</a>
             </div>
             {err && <div className="badge red">{err}</div>}
@@ -68,7 +69,7 @@ export function Intake() {
               {draft.source === 'demo' && <span className="badge amber">Demo AI</span>}
               <div className="spacer" />
               <button className="btn primary" onClick={commit} disabled={!!busy}>
-                {busy === 'commit' ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-plus" />} Add to timeline
+                {busy === 'commit' ? <Icon name="spinner" spin /> : <Icon name="plus" />} Add to timeline
               </button>
             </div>
             <table className="t">
@@ -104,7 +105,7 @@ export function Intake() {
             <b>Spec</b>
             {po.spec.map((s: any) => <div key={s.key}>{s.key}: <span className="muted">{s.value}</span></div>)}
             <b>QC checks</b>
-            {po.qcRequirements.map((q: string) => <div key={q} className="check ok"><i className="fa fa-camera" />{q}</div>)}
+            {po.qcRequirements.map((q: string) => <div key={q} className="check ok"><Icon name="camera" />{q}</div>)}
           </div>
         )}
       </div>

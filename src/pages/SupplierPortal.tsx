@@ -4,6 +4,7 @@ import { api, usd } from '../lib/api';
 import { useApp } from '../lib/store';
 import { QcReportCard } from './Payments';
 import { SAMPLE_DELAY } from '../components/DelayComposer';
+import { Icon } from '../components/Icon';
 
 const SETS = {
   good: ['qc-good-1.png', 'qc-good-2.png'],
@@ -51,7 +52,7 @@ export function SupplierPortal() {
   return (
     <div className="standalone">
       <div className="standalone-top">
-        <span className="logo-mark" style={{ width: 30, height: 30, borderRadius: 9, background: '#14532d', color: '#bbf7d0', display: 'grid', placeItems: 'center' }}><i className="fa fa-anchor" /></span>
+        <span className="avatar" style={{ borderRadius: 11 }}><Icon name="anchor" size={17} /></span>
         <div>
           <div className="strong">Landed supplier portal</div>
           <div className="muted small">{supplier?.name ?? '…'} · {poId} for {state?.merchant.name}</div>
@@ -78,7 +79,7 @@ export function SupplierPortal() {
             )}
             <div className="row">
               <button className="btn primary" disabled={busy || (!samples.length && !files?.length)} onClick={inspect}>
-                {busy ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-magnifying-glass" />} Submit for inspection
+                {busy ? <Icon name="spinner" spin /> : <Icon name="search" />} Submit for inspection
               </button>
               {busy && <span className="muted small">Comparing against the golden sample and the PO spec…</span>}
               {err && <span className="badge red">{err}</span>}
@@ -92,8 +93,8 @@ export function SupplierPortal() {
           <div className="card-b stack">
             <textarea className="input" value={msg} onChange={e => setMsg(e.target.value)} rows={4} />
             <div className="row">
-              <button className="btn primary" onClick={sendUpdate} disabled={!!sent && !ack}><i className="fa fa-paper-plane" /> Send update</button>
-              {!!sent && !ack && <span className="muted small"><i className="fa fa-circle-notch fa-spin" /> Delivered — Kiln & Co's agent is re-planning…</span>}
+              <button className="btn primary" onClick={sendUpdate} disabled={!!sent && !ack}><Icon name="send" /> Send update</button>
+              {!!sent && !ack && <span className="muted small"><Icon name="spinner" spin /> Delivered — Kiln & Co's agent is re-planning…</span>}
               {ack && <span className="badge green">Kiln & Co has been notified and will reply shortly.</span>}
             </div>
           </div>

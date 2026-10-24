@@ -27,7 +27,7 @@ export function Runway() {
       rowHeight: 74,
       barMargin: 14,
       readOnly: true,
-      eventStyle: 'rounded',
+      eventStyle: 'plain',
       milestoneLayoutMode: 'measure',
       milestoneTextPosition: 'always-outside',
       columns: [
@@ -70,10 +70,10 @@ export function Runway() {
     <>
       <div className="tl-toolbar">
         <div className="legend">
-          <span><i className="sw" style={{ background: '#16a34a' }} />In stock</span>
-          <span><i className="sw" style={{ background: '#d97706' }} />Sold out · taking pre-orders</span>
-          <span><i className="sw" style={{ background: '#dc2626' }} />Sold out · losing sales</span>
-          <span><i className="sw" style={{ background: '#1d4ed8' }} />Inbound shipment lands</span>
+          <span><i className="sw lime" />In stock</span>
+          <span><i className="sw straw" />Sold out · taking pre-orders</span>
+          <span><i className="sw apricot" />Sold out · losing sales</span>
+          <span><i className="sw ink" />Inbound shipment lands</span>
         </div>
         <div style={{ flex: 1 }} />
         <span className="muted tiny">Bryntum Scheduler · recalculated from the live plan and the demand model every time the schedule changes</span>

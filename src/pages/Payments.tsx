@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../lib/store';
 import { api, ago, fmtDate, usd } from '../lib/api';
 import { toast } from '../components/Toast';
+import { Icon } from '../components/Icon';
 
 const PAY: Record<string, string> = { paid: 'green', scheduled: 'blue', processing: 'blue', held: 'amber', failed: 'red' };
 const GATE: Record<string, string> = { qc_pass: 'Released when AI QC passes', goods_received: 'Released when goods arrive', none: 'Released on approval' };
@@ -40,20 +41,20 @@ export function Payments() {
               const sup = state.suppliers.find((s: any) => s.id === po?.supplierId);
               return (
                 <tr key={p.id}>
-                  <td className="strong">{p.poId}</td>
-                  <td>{sup?.name}<div className="muted tiny">{sup?.paypalEmail}</div></td>
+                  <td className="strong" style={{ whiteSpace: 'nowrap' }}>{p.poId}</td>
+                  <td>{sup?.name}<div className="muted tiny trunc" title={sup?.paypalEmail}>{sup?.paypalEmail}</div></td>
                   <td>{p.label}</td>
                   <td className="r num strong">{usd(p.amount)}</td>
                   <td className="small">{GATE[p.gate ?? 'none']}</td>
                   <td>
-                    <span className={`badge ${PAY[p.status]}`}>{p.status}</span>
+                    <span className={`badge cap ${PAY[p.status]}`}>{p.status}</span>
                     {p.holdReason && <div className="tiny muted" style={{ maxWidth: 260, marginTop: 4 }}>{p.holdReason}</div>}
                   </td>
                   <td className="mono tiny">{p.payoutBatchId ?? (p.paidAt ? `paid ${fmtDate(p.paidAt)} (history)` : '—')}{p.simulated && p.payoutBatchId ? ' · simulated' : ''}</td>
                   <td className="r">
                     {p.status !== 'paid' && p.status !== 'processing' && (
                       <button className="btn sm" disabled={busy === p.id} onClick={() => release(p.id)}>
-                        {busy === p.id ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-circle-dollar-to-slot" />} Release
+                        {busy === p.id ? <Icon name="spinner" spin /> : <Icon name="dollar" />} Release
                       </button>
                     )}
                   </td>
@@ -68,7 +69,7 @@ export function Payments() {
         <div className="card-h">
           <h2>AI quality inspections</h2>
           <div className="spacer" />
-          <a className="btn sm" href="/portal/PO-1042" target="_blank" rel="noreferrer"><i className="fa fa-industry" /> Open supplier portal to upload photos</a>
+          <a className="btn sm" href="/portal/PO-1042" target="_blank" rel="noreferrer"><Icon name="factory" /> Open supplier portal to upload photos</a>
         </div>
         {state.qcReports.length === 0 && <div className="empty">No inspections yet. The factory uploads photos from the supplier portal; the balance payment is released only if the batch passes.</div>}
         {state.qcReports.map((r: any) => <QcReportCard key={r.id} r={r} />)}
@@ -95,7 +96,7 @@ export function QcReportCard({ r }: { r: any }) {
           <p>{r.summary}</p>
           {r.checks.map((c: any) => (
             <div key={c.name} className={`check ${c.result === 'pass' ? 'ok' : 'no'}`}>
-              <i className={`fa ${c.result === 'pass' ? 'fa-circle-check' : c.result === 'fail' ? 'fa-circle-xmark' : 'fa-circle-question'}`} />
+              <Icon name={c.result === 'pass' ? 'circle-check' : c.result === 'fail' ? 'circle-x' : 'help'} size={16} />
               <span><b>{c.name}</b> — <span className="muted">{c.note}</span></span>
             </div>
           ))}

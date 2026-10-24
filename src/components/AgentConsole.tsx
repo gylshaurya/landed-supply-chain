@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { AgentEvent } from '../lib/store';
+import { Icon } from './Icon';
 
 export function AgentConsole({ events, running }: { events: AgentEvent[]; running: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,7 +28,7 @@ export function AgentConsole({ events, running }: { events: AgentEvent[]; runnin
       })}
       {running && (
         <div className="ln">
-          <span className="spin"><i className="fa fa-circle-notch fa-spin" /></span>
+          <span className="spin"><Icon name="spinner" spin /></span>
           <span className="spin">agent working…</span>
         </div>
       )}

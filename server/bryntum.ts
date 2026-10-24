@@ -14,16 +14,16 @@ import type { DB, Dependency, Task } from './types.js';
 type Row = Record<string, unknown> & { id: string; children?: Row[] };
 
 const KIND_COLOR: Record<string, string> = {
-  production: '#c2410c',
-  qc: '#7c3aed',
-  freight: '#0f766e',
-  air: '#0284c7',
-  customs: '#57534e',
-  warehouse: '#4d7c0f',
-  launch: '#111827',
-  group: '#334155',
+  production: '#f2a65e',
+  qc: '#ece56c',
+  freight: '#9cc65a',
+  air: '#6f9f37',
+  customs: '#cfcfc8',
+  warehouse: '#b9b9b1',
+  launch: '#141414',
+  group: '#3a3a37',
 };
-const PAY_COLOR: Record<string, string> = { paid: '#16a34a', scheduled: '#0070e0', processing: '#0070e0', held: '#d97706', failed: '#dc2626' };
+const PAY_COLOR: Record<string, string> = { paid: '#7fae3f', scheduled: '#0070e0', processing: '#0070e0', held: '#f2a65e', failed: '#c9472e' };
 
 export function projectPayload(db: DB, tasks: Task[] = scheduled(db), deps: Dependency[] = db.dependencies, extra: Partial<Record<string, unknown>> = {}) {
   const payments = new Map(db.payments.map(p => [p.id, p]));
@@ -181,7 +181,7 @@ export function runwayPayload(db: DB) {
       if (!seg) return;
       const label = seg.state === 'in' ? `In stock` : product.preorderOpen ? 'Sold out · taking pre-orders' : 'Sold out · losing sales';
       const state = seg.state === 'in' ? 'in' : product.preorderOpen ? 'preorder' : 'lost';
-      events.push({ id: `${product.id}-${seg.start}`, resourceId: product.id, name: label, startDate: seg.start, endDate: end, state, eventColor: { in: '#16a34a', preorder: '#d97706', lost: '#dc2626' }[state] });
+      events.push({ id: `${product.id}-${seg.start}`, resourceId: product.id, name: label, startDate: seg.start, endDate: end, state, eventColor: { in: '#9cc65a', preorder: '#ece56c', lost: '#f2a65e' }[state] });
     };
     for (const pt of sim.stockSeries) {
       const state = pt.stock >= Math.max(1, pt.demand * 0.5) ? 'in' : 'out';
@@ -192,7 +192,7 @@ export function runwayPayload(db: DB) {
     }
     if (sim.stockSeries.length) flush(addDays(sim.stockSeries.at(-1)!.date, 1));
     for (const b of batches) {
-      events.push({ id: `arr-${product.id}-${b.label}`, resourceId: product.id, name: `+${b.units} ${b.label.endsWith('air') ? 'by air' : 'units'}`, startDate: b.date, endDate: b.date, duration: 0, state: 'arrival', eventColor: '#1d4ed8' });
+      events.push({ id: `arr-${product.id}-${b.label}`, resourceId: product.id, name: `+${b.units} ${b.label.endsWith('air') ? 'by air' : 'units'}`, startDate: b.date, endDate: b.date, duration: 0, state: 'arrival', eventColor: '#141414' });
     }
   }
   return { resources, events, startDate: addDays(sortedFirst(events), -2) };

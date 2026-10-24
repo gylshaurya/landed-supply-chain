@@ -1,17 +1,17 @@
 import { useRef, useState } from 'react';
 import { useApp } from '../lib/store';
 import { LandedGantt, type GanttHandle } from '../components/LandedGantt';
+import { Icon } from '../components/Icon';
 
 const LEGEND: [string, string][] = [
-  ['#c2410c', 'Production'],
-  ['#7c3aed', 'AI QC inspection'],
-  ['#0f766e', 'Ocean / ground freight'],
-  ['#0284c7', 'Air freight'],
-  ['#57534e', 'Customs'],
-  ['#4d7c0f', 'Warehouse'],
-  ['#0070e0', 'PayPal payment · scheduled'],
-  ['#16a34a', 'PayPal payment · paid'],
-  ['#d97706', 'PayPal payment · held'],
+  ['#f2a65e', 'Production'],
+  ['#ece56c', 'AI QC'],
+  ['#9cc65a', 'Sea / ground'],
+  ['#6f9f37', 'Air'],
+  ['#cfcfc8', 'Customs'],
+  ['#b9b9b1', 'Warehouse'],
+  ['#0070e0', 'PayPal · scheduled'],
+  ['#7fae3f', 'PayPal · paid'],
 ];
 
 export function Timeline() {
@@ -26,14 +26,14 @@ export function Timeline() {
     <>
       <div className="tl-toolbar">
         <button className={`btn sm ${critical ? 'primary' : ''}`} onClick={() => setCritical(c => !c)}>
-          <i className="fa fa-route" /> Critical path
+          <Icon name="route" /> Critical path
         </button>
         <button className={`btn sm ${baseline && hasBaseline ? 'primary' : ''}`} disabled={!hasBaseline} onClick={() => setBaseline(b => !b)} title={hasBaseline ? 'Grey bars show the plan before the agent re-planned' : 'Appears after you approve a recovery plan'}>
-          <i className="fa fa-layer-group" /> Plan before re-plan
+          <Icon name="layers" /> Plan before re-plan
         </button>
-        <button className="btn sm" onClick={() => g()?.zoomIn()}><i className="fa fa-magnifying-glass-plus" /></button>
-        <button className="btn sm" onClick={() => g()?.zoomOut()}><i className="fa fa-magnifying-glass-minus" /></button>
-        <button className="btn sm" onClick={() => g()?.zoomToFit({ leftMargin: 40, rightMargin: 60 })}><i className="fa fa-arrows-left-right-to-line" /> Fit</button>
+        <button className="btn sm" onClick={() => g()?.zoomIn()}><Icon name="zoom-in" /></button>
+        <button className="btn sm" onClick={() => g()?.zoomOut()}><Icon name="zoom-out" /></button>
+        <button className="btn sm" onClick={() => g()?.zoomToFit({ leftMargin: 40, rightMargin: 60 })}><Icon name="fit" /> Fit</button>
         <div className="legend" style={{ marginLeft: 8 }}>
           {LEGEND.map(([c, l]) => (
             <span key={l}><i className="sw" style={{ background: c }} />{l}</span>

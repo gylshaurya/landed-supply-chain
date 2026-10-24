@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Icon } from './Icon';
 
 let push: (msg: string) => void = () => {};
 export const toast = (msg: string) => push(msg);
@@ -14,7 +15,7 @@ export function Toaster() {
   if (!msg) return null;
   return (
     <div className="toast" role="status">
-      <i className="fa fa-circle-check" style={{ color: '#86efac', marginTop: 3 }} />
+      <Icon name="circle-check" />
       <span>{msg}</span>
     </div>
   );

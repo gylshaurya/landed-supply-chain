@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { api, fmtDate, usd } from '../lib/api';
+import { Icon } from '../components/Icon';
 
 export function Notice() {
   const { token } = useParams();
@@ -26,12 +27,12 @@ export function Notice() {
     }
   }
 
-  if (err) return <div className="standalone"><div className="standalone-body"><div className="card empty">{err}</div></div></div>;
-  if (!v) return <div className="standalone"><div className="standalone-body empty">Loading…</div></div>;
+  if (err) return <div className="standalone shop"><div className="standalone-body"><div className="card empty">{err}</div></div></div>;
+  if (!v) return <div className="standalone shop"><div className="standalone-body empty">Loading…</div></div>;
   const p = v.preorder;
   const done = p.status === 'kept' || p.status === 'refunded';
   return (
-    <div className="standalone">
+    <div className="standalone shop">
       <div className="standalone-top"><span className="serif" style={{ fontSize: 22 }}>{v.merchant}</span></div>
       <div className="standalone-body" style={{ maxWidth: 640 }}>
         <div className="card">
@@ -44,10 +45,10 @@ export function Notice() {
                 <p className="muted small">You choose. Cancelling is free and refunds the full {usd(p.amount)} to your PayPal account right away.</p>
                 <div className="grid cols-2">
                   <button className={`btn lg ${suggested === 'keep' ? 'primary' : ''}`} onClick={() => choose('keep')} disabled={!!busy}>
-                    {busy === 'keep' ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-heart" />} Keep my order{v.goodwillCredit > 0 ? ` (+${usd(v.goodwillCredit)} back)` : ''}
+                    {busy === 'keep' ? <Icon name="spinner" spin /> : <Icon name="heart" />} Keep my order{v.goodwillCredit > 0 ? ` (+${usd(v.goodwillCredit)} back)` : ''}
                   </button>
                   <button className={`btn lg ${suggested === 'cancel' ? 'paypal' : ''}`} onClick={() => choose('cancel')} disabled={!!busy}>
-                    {busy === 'cancel' ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-rotate-left" />} Cancel · full refund
+                    {busy === 'cancel' ? <Icon name="spinner" spin /> : <Icon name="reset" />} Cancel · full refund
                   </button>
                 </div>
               </>

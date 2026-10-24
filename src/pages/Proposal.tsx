@@ -4,6 +4,7 @@ import { api, fmtDate, usd } from '../lib/api';
 import { useApp } from '../lib/store';
 import { LandedGantt } from '../components/LandedGantt';
 import { toast } from '../components/Toast';
+import { Icon } from '../components/Icon';
 
 export function ProposalPage() {
   const { id } = useParams();
@@ -61,7 +62,7 @@ export function ProposalPage() {
         {p.status === 'pending' && (
           <div className="row">
             <button className="btn primary lg" onClick={approve} disabled={busy}>
-              {busy ? <i className="fa fa-circle-notch fa-spin" /> : <i className="fa fa-check" />} Approve & execute
+              {busy ? <Icon name="spinner" spin /> : <Icon name="check" />} Approve & execute
             </button>
             <button className="btn lg" onClick={reject} disabled={busy}>Dismiss</button>
             <span className="muted small">
@@ -73,12 +74,12 @@ export function ProposalPage() {
         {p.status === 'approved' && (
           <div className="stack">
             {p.executionLog?.map((l: string) => (
-              <div className="check ok" key={l}><i className="fa fa-circle-check" /><span>{l}</span></div>
+              <div className="check ok" key={l}><Icon name="circle-check" /><span>{l}</span></div>
             ))}
             <div className="row">
-              <Link className="btn" to="/timeline"><i className="fa fa-bars-staggered" /> See the new timeline</Link>
-              <Link className="btn" to="/preorders"><i className="fa fa-receipt" /> Pre-orders</Link>
-              <Link className="btn" to="/outbox"><i className="fa fa-paper-plane" /> Sent notices</Link>
+              <Link className="btn" to="/timeline"><Icon name="timeline" /> See the new timeline</Link>
+              <Link className="btn" to="/preorders"><Icon name="receipt" /> Pre-orders</Link>
+              <Link className="btn" to="/outbox"><Icon name="send" /> Sent notices</Link>
             </div>
           </div>
         )}
@@ -99,7 +100,7 @@ export function ProposalPage() {
             {p.options.map((o: any) => (
               <tr key={o.key} className={o.key === p.recommendedKey ? 'best' : ''}>
                 <td className="strong">
-                  {o.key === p.recommendedKey && <i className="fa fa-star" style={{ color: '#16a34a', marginRight: 6 }} />}
+                  {o.key === p.recommendedKey && <Icon name="star" />}
                   {o.label}
                 </td>
                 <td>{fmtDate(o.firstShipDate)} {o.hitsBlackFriday ? <span className="badge green">before BF</span> : <span className="badge red">after BF</span>}</td>
@@ -148,7 +149,7 @@ export function ProposalPage() {
             <div className="strong">{p.customerNotice.subject}</div>
             <div className="email">{sample}</div>
             {p.ftcChecks.map((c: any) => (
-              <div key={c.name} className={`check ${c.ok ? 'ok' : 'no'}`}><i className={`fa ${c.ok ? 'fa-circle-check' : 'fa-circle-xmark'}`} />{c.name}</div>
+              <div key={c.name} className={`check ${c.ok ? 'ok' : 'no'}`}><Icon name={c.ok ? 'circle-check' : 'circle-x'} size={16} />{c.name}</div>
             ))}
             {p.goodwillCredit > 0 && <div className="small muted">Customers who wait get a {usd(p.goodwillCredit)} partial refund through PayPal as a thank-you.</div>}
           </div>

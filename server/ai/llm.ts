@@ -57,14 +57,18 @@ const retryable = (e: unknown) => {
  * agent so a conversation stays on one model once it has started.
  */
 async function generate(params: Omit<Parameters<GoogleGenAI['models']['generateContent']>[0], 'model'>, label: string, session: { model?: string; started?: boolean } = {}) {
-  const chain = session.model ? [session.model] : geminiChain();
+  // A running conversation prefers its model, but may still fall back when that model is out of quota.
+  const chain = session.model ? [session.model, ...geminiChain().filter(m => m !== session.model)] : geminiChain();
   let lastError: unknown;
   for (const model of chain) {
-    const attempts = session.started ? 6 : 2;
+    const attempts = session.started && model === session.model ? 4 : 2;
     for (let attempt = 0; attempt < attempts; attempt++) {
       try {
-        const res = await geminiClient().models.generateContent({ ...params, model, config: { ...params.config, httpOptions: { timeout: 90_000 } } });
-        if (!session.model) {
+        // Thought signatures are model-specific: drop them when a conversation changes model.
+        const contents = session.model && model !== session.model ? stripSignatures(params.contents) : params.contents;
+        const res = await geminiClient().models.generateContent({ ...params, contents, model, config: { ...params.config, httpOptions: { timeout: 90_000 } } });
+        if (session.model && model !== session.model) console.warn(`[gemini] ${label}: switched ${session.model} → ${model}`);
+        if (session.model !== model) {
           console.log(`[gemini] ${label} → ${model}`);
           markHealthy(model);
         }
@@ -82,6 +86,11 @@ async function generate(params: Omit<Parameters<GoogleGenAI['models']['generateC
     }
   }
   throw lastError;
+}
+
+function stripSignatures(contents: unknown): any {
+  if (!Array.isArray(contents)) return contents;
+  return contents.map((c: any) => (c?.parts ? { ...c, parts: c.parts.map(({ thoughtSignature: _t, ...p }: any) => p) } : c));
 }
 
 function toGeminiParts(content: InputPart[] | string): Part[] {

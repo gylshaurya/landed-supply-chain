@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Grid, StringHelper } from '@bryntum/gantt';
 import { api, fmtDate, usd } from '../lib/api';
 import { useApp } from '../lib/store';
+import { Icon } from '../components/Icon';
 
 const STATUS: Record<string, [string, string]> = {
   active: ['blue', 'Promised'],
@@ -82,7 +83,7 @@ export function Preorders() {
         <span className="badge red">{rows.filter(r => r.status === 'refunded').length} refunded</span>
         <span className="badge violet">{rows.filter(r => r.status === 'shipped').length} shipped</span>
         <div style={{ flex: 1 }} />
-        <a className="btn sm" href="/store" target="_blank" rel="noreferrer"><i className="fa fa-store" /> Place a real sandbox pre-order</a>
+        <a className="btn sm" href="/store" target="_blank" rel="noreferrer"><Icon name="store" /> Place a real sandbox pre-order</a>
         <span className="muted tiny">{state?.modes.paypal === 'sandbox' ? 'Live PayPal sandbox captures & refunds' : 'PayPal simulated'}</span>
       </div>
       <div className="bryntum-host" ref={host} />

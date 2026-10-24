@@ -58,7 +58,7 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
         autoLoad: true,
         validateResponse: false,
       } as any,
-      subGridConfigs: { locked: { width: 520 } },
+      subGridConfigs: { locked: { width: 540 } },
       startDate: '2026-08-24',
       endDate: '2027-01-04',
       viewPreset: {
@@ -78,7 +78,7 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
       columns: [
         {
           type: 'name',
-          width: 232,
+          width: 226,
           renderer: ({ record }: any) => ({
             children: [
               { tag: 'span', text: record.name },
@@ -191,7 +191,7 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
             }
           : {}),
       } as any,
-      taskRenderer: ({ taskRecord }: any) => (taskRecord.isLeaf && !taskRecord.isMilestone ? StringHelper.encodeHtml(taskRecord.name) : ''),
+      taskRenderer: ({ taskRecord }: any) => (taskRecord.isLeaf && !taskRecord.isMilestone && taskRecord.duration >= 6 ? StringHelper.encodeHtml(taskRecord.name) : ''),
     } as any);
 
     ganttRef.current = gantt;

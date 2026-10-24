@@ -7,7 +7,7 @@ import { bus } from './bus.js';
 import { getDb, resetDb } from './db.js';
 import { applySync, projectPayload, runwayPayload } from './bryntum.js';
 import { addDays, diffDays } from './dates.js';
-import { evaluateScenario, keyDates, scheduled } from './sim.js';
+import { blackFridayReadiness, evaluateScenario, keyDates, scheduled, weeklyForecast } from './sim.js';
 import { BLACK_FRIDAY } from './seed/data.js';
 import * as svc from './services.js';
 import * as paypal from './paypal.js';
@@ -86,6 +86,10 @@ app.get('/api/state', h(() => {
       heldOrScheduled: db.payments.filter(p => p.status !== 'paid').reduce((s, p) => s + p.amount, 0),
       heroLaunch: dates[hero.id]?.airLaunch ?? dates[hero.id]?.launch,
       heroAtRisk: svc.promisesAtRisk(hero.id),
+      bfReadiness: blackFridayReadiness(db, hero.productId),
+      poValue: db.purchaseOrders.reduce((s, po) => s + po.quantity * po.unitCost, 0),
+      promiseTotal: db.preorders.length,
+      promiseBroken: db.preorders.filter(p => p.revisedDate).length + svc.promisesAtRisk(hero.id),
       heroPromise: heroProduct.promisedShipDate,
     },
     proposals: db.proposals.map(p => ({ id: p.id, status: p.status, headline: p.headline, poId: p.poId, createdAt: p.createdAt, source: p.source })),
@@ -113,6 +117,7 @@ app.get('/api/events', (req, res) => {
 app.get('/api/project/load', h(() => projectPayload(getDb())));
 app.post('/api/project/sync', h(req => applySync(req.body)));
 app.get('/api/runway', h(() => runwayPayload(getDb())));
+app.get('/api/forecast/:productId', h(req => weeklyForecast(getDb(), String(req.params.productId))));
 
 // ---------------------------------------------------------------- simulation (used by Bryntum Copilot tools)
 app.post('/api/simulate', h(req => {

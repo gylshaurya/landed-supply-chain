@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api, fmtDate, usd } from '../lib/api';
 import { useApp } from '../lib/store';
+import { Icon } from '../components/Icon';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -109,9 +110,9 @@ export function Store() {
     }
   }
 
-  if (!state || !product) return <div className="standalone"><div className="standalone-body empty">Loading…</div></div>;
+  if (!state || !product) return <div className="standalone shop"><div className="standalone-body empty">Loading…</div></div>;
   return (
-    <div className="standalone">
+    <div className="standalone shop">
       {mode !== 'sandbox' && <div className="demo-banner">PayPal is in simulated mode — add sandbox credentials to .env for real PayPal checkout.</div>}
       <div className="standalone-top">
         <span className="serif" style={{ fontSize: 24 }}>Kiln & Co</span>
@@ -128,7 +129,7 @@ export function Store() {
             <div className="price">{usd(product.price)}</div>
             <p className="muted">{product.blurb}</p>
             <div className="ship-promise">
-              <i className="fa fa-truck-fast" style={{ color: '#14532d' }} />
+              <Icon name="truck" />
               <div>
                 <div className="strong">Ships by {fmtDate(product.promisedShipDate, { weekday: 'long', month: 'long', day: 'numeric' })}</div>
                 <div className="muted tiny">This date updates live from our supply timeline. If it ever slips, we'll tell you first and you can cancel for a full refund.</div>
@@ -147,7 +148,7 @@ export function Store() {
                   <>
                     <paypal-button id="paypal-button" type="pay" hidden />
                     <paypal-pay-later-button id="paylater-button" hidden />
-                    {!sdkReady && status.kind !== 'error' && <span className="muted small"><i className="fa fa-circle-notch fa-spin" /> Loading PayPal…</span>}
+                    {!sdkReady && status.kind !== 'error' && <span className="muted small"><Icon name="spinner" spin /> Loading PayPal…</span>}
                   </>
                 ) : (
                   <button className="btn paypal lg" onClick={simulatedCheckout} disabled={status.kind === 'busy'}>
@@ -156,7 +157,7 @@ export function Store() {
                 )}
               </div>
             )}
-            {status.kind === 'busy' && <div className="muted small"><i className="fa fa-circle-notch fa-spin" /> {status.text}</div>}
+            {status.kind === 'busy' && <div className="muted small"><Icon name="spinner" spin /> {status.text}</div>}
             {status.kind === 'error' && <div className="badge red" style={{ whiteSpace: 'normal' }}>{status.text}</div>}
             {status.kind === 'done' && (
               <div className="hero-alert good">

@@ -17,7 +17,7 @@ step('reset');
 
 // 1. Supplier delay → agent → proposal
 await page.goto(base + '/', { waitUntil: 'networkidle' });
-await page.getByText('Simulate a supplier message').click();
+await page.getByText('Send a supplier message').click();
 await page.getByRole('button', { name: 'Send update to Landed' }).click();
 await page.getByText('Review recovery plan').first().waitFor({ timeout: 240_000 });
 step('proposal ready');

@@ -46,7 +46,7 @@ export interface DemandResult {
   newPreorderUnits: number;
   stockoutDays: number;
   shipDates: Map<string, string>; // preorder id -> ship date
-  stockSeries: { date: string; stock: number; demand: number }[];
+  stockSeries: { date: string; stock: number; demand: number; sold: number; preordered: number; lost: number; arrived: number }[];
 }
 
 /** Day-by-day simulation of stock, pre-order fulfilment and lost sales. */
@@ -82,24 +82,27 @@ export function simulateDemand(product: Product, preorders: Preorder[], batches:
     }
     if (date < from) continue;
     const demand = product.dailyVelocity * seasonality(date);
+    let daySold = 0, dayPre = 0, dayLost = 0;
     if (queue.length === 0 && pendingNew === 0 && stock >= demand) {
       stock -= demand;
-      soldUnits += demand;
+      daySold = demand;
     } else {
-      const sold = queue.length === 0 && pendingNew === 0 ? stock : 0;
-      stock -= sold;
-      soldUnits += sold;
-      const unmet = demand - sold;
+      daySold = queue.length === 0 && pendingNew === 0 ? stock : 0;
+      stock -= daySold;
+      const unmet = demand - daySold;
       stockoutDays += 1;
       if (product.preorderOpen) {
-        newPreorderUnits += unmet * PREORDER_CONVERSION;
-        pendingNew += unmet * PREORDER_CONVERSION;
-        lostUnits += unmet * (1 - PREORDER_CONVERSION);
+        dayPre = unmet * PREORDER_CONVERSION;
+        pendingNew += dayPre;
+        dayLost = unmet * (1 - PREORDER_CONVERSION);
       } else {
-        lostUnits += unmet;
+        dayLost = unmet;
       }
     }
-    series.push({ date, stock: Math.max(0, Math.round(stock)), demand: Math.round(demand * 10) / 10 });
+    soldUnits += daySold;
+    newPreorderUnits += dayPre;
+    lostUnits += dayLost;
+    series.push({ date, stock: Math.max(0, Math.round(stock)), demand: Math.round(demand * 10) / 10, sold: daySold, preordered: dayPre, lost: dayLost, arrived: arrivals.get(date) ?? 0 });
   }
   return {
     lostUnits: Math.round(lostUnits),
@@ -284,4 +287,39 @@ export function nextPromiseDate(db: DB, productId: string, tasks: Task[]): strin
     if (capacity > 25) return addDays(b.date, 1);
   }
   return maxDate(...batches.map(b => addDays(b.date, 1)));
+}
+
+/** Weekly sold / pre-ordered / lost revenue for one product under the current plan. */
+export function weeklyForecast(db: DB, productId: string) {
+  const product = db.products.find(p => p.id === productId)!;
+  const tasks = scheduled(db);
+  const sim = simulateDemand(product, db.preorders, batchesFor(db, productId, tasks));
+  const weeks: { weekStart: string; sold: number; preordered: number; lost: number; arrivals: number }[] = [];
+  for (const pt of sim.stockSeries) {
+    const dow = (new Date(`${pt.date}T00:00:00Z`).getUTCDay() + 6) % 7; // Monday = 0
+    const weekStart = addDays(pt.date, -dow);
+    let w = weeks.at(-1);
+    if (!w || w.weekStart !== weekStart) weeks.push((w = { weekStart, sold: 0, preordered: 0, lost: 0, arrivals: 0 }));
+    w.sold += pt.sold * product.price;
+    w.preordered += pt.preordered * product.price;
+    w.lost += pt.lost * product.price;
+    w.arrivals += pt.arrived;
+  }
+  const round = (n: number) => Math.round(n);
+  return {
+    product: { id: product.id, name: product.name, price: product.price },
+    weeks: weeks.map(w => ({ ...w, sold: round(w.sold), preordered: round(w.preordered), lost: round(w.lost) })),
+    totals: { sold: round(sim.soldUnits * product.price), preordered: round(sim.newPreorderUnits * product.price), lost: sim.lostRevenue },
+  };
+}
+
+/** Units free to sell on Black Friday weekend vs. the demand expected then. */
+export function blackFridayReadiness(db: DB, productId: string) {
+  const product = db.products.find(p => p.id === productId)!;
+  const batches = batchesFor(db, productId, scheduled(db));
+  const committed = db.preorders.filter(p => p.productId === productId && (p.status === 'active' || p.status === 'kept')).reduce((s, p) => s + p.qty, 0);
+  const landed = batches.filter(b => b.date < BLACK_FRIDAY).reduce((s, b) => s + b.units, 0);
+  let needed = 0;
+  for (let d = BLACK_FRIDAY; d <= CYBER_MONDAY; d = addDays(d, 1)) needed += product.dailyVelocity * seasonality(d);
+  return { available: Math.max(0, product.stockOnHand + landed - committed), needed: Math.round(needed), committed, landed };
 }

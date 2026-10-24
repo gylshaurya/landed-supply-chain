@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useApp } from '../lib/store';
 import { AgentConsole } from './AgentConsole';
+import { Icon } from './Icon';
 
 export const SAMPLE_DELAY =
   'Hello Kiln & Co team, very sorry — our second kiln had a heating element failure this week. Production of PO-1042 needs 12 more days. If you can pay $1,800 for overtime (weekend shifts + rented kiln time) we can save 5 days.';
@@ -39,7 +40,7 @@ export function DelayComposer({ poId = 'PO-1042', compact = false }: { poId?: st
           </label>
           <div className="row">
             <button className="btn primary" onClick={send} disabled={!msg.trim()}>
-              <i className="fa fa-paper-plane" /> Send update to Landed
+              <Icon name="send" /> Send update to Landed
             </button>
             <span className="muted small">The recovery agent reads it, re-plans, and proposes a fix.</span>
           </div>
@@ -49,7 +50,7 @@ export function DelayComposer({ poId = 'PO-1042', compact = false }: { poId?: st
       {proposalId && (
         <div className="row">
           <button className="btn primary lg" onClick={() => nav(`/proposals/${proposalId}`)}>
-            <i className="fa fa-clipboard-check" /> Review recovery plan
+            <Icon name="clipboard" /> Review recovery plan
           </button>
         </div>
       )}
@@ -77,12 +78,12 @@ export function RecoverButton({ poId = 'PO-1042' }: { poId?: string }) {
     <div className="stack">
       {!started && (
         <div className="row">
-          <button className="btn primary lg" onClick={go}><i className="fa fa-wand-magic-sparkles" /> Ask the recovery agent</button>
+          <button className="btn primary lg" onClick={go}><Icon name="sparkles" /> Ask the recovery agent</button>
           <span className="muted small">It simulates fixes (air freight, overtime, customer notices) and proposes the best one.</span>
         </div>
       )}
       {!!started && <AgentConsole events={events} running={!done} />}
-      {proposalId && <button className="btn primary lg" onClick={() => nav(`/proposals/${proposalId}`)}><i className="fa fa-clipboard-check" /> Review recovery plan</button>}
+      {proposalId && <button className="btn primary lg" onClick={() => nav(`/proposals/${proposalId}`)}><Icon name="clipboard" /> Review recovery plan</button>}
     </div>
   );
 }
