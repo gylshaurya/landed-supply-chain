@@ -7,3 +7,5 @@ test-results
 playwright-report
 .DS_Store
 data/test-db.json
+e2e/shots
+e2e/shots-live
