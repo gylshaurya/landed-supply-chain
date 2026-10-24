@@ -87,11 +87,11 @@ export function ModeBadges({ modes }: { modes: any }) {
     <>
       <span className="chip" title={modes.ai === 'live' ? `Agents run on ${modes.model}` : 'No AI key: agents use recorded demo responses'}>
         <span className="dot" style={{ color: modes.ai === 'live' ? 'var(--lime)' : 'var(--apricot)' }} />
-        {modes.ai === 'live' ? `${modes.provider === 'gemini' ? 'Gemini' : 'Claude'} · ${modes.model}` : 'Demo AI'}
+        <span>{modes.ai === 'live' ? <>{modes.provider === 'gemini' ? 'Gemini' : 'Claude'}<span className="long"> · {modes.model}</span></> : 'Demo AI'}</span>
       </span>
       <span className="chip" title={modes.paypal === 'sandbox' ? 'Live calls to the PayPal sandbox' : 'No PayPal credentials: calls are simulated'}>
         <span className="dot" style={{ color: modes.paypal === 'sandbox' ? 'var(--paypal)' : 'var(--apricot)' }} />
-        {modes.paypal === 'sandbox' ? 'PayPal sandbox' : 'PayPal simulated'}
+        <span>PayPal<span className="long">{modes.paypal === 'sandbox' ? ' sandbox' : ' simulated'}</span></span>
       </span>
     </>
   );

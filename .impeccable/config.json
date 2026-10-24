@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-10-24T17:11:29.970Z",
+        "reason": "user confirmed: storefront and customer notice keep Kiln & Co's existing shop typography (Scope question answered 'Dashboard only'); Landed itself uses Satoshi"
+      }
+    ]
+  }
+}

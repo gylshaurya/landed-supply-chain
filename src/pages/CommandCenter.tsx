@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../lib/store';
 import { api, daysBetween, fmtDate, usd } from '../lib/api';
@@ -49,9 +49,18 @@ function SalesCard() {
   const [productId, setProductId] = useState('pour-over');
   const [data, setData] = useState<{ weeks: Week[]; totals: { sold: number; preordered: number; lost: number } } | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+  const colsRef = useRef<HTMLDivElement>(null);
+  const [colsWidth, setColsWidth] = useState(600);
   useEffect(() => {
     void api(`/api/forecast/${productId}`).then(setData);
   }, [productId, version]);
+  useEffect(() => {
+    const el = colsRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setColsWidth(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const k = state.kpis;
 
   const { max, min, ticks } = useMemo(() => {
@@ -66,6 +75,12 @@ function SalesCard() {
     return { max, min, ticks };
   }, [data]);
 
+  // Show as many week labels as fit (~64px each); the Black Friday week always keeps its label.
+  const weeks = data?.weeks ?? [];
+  const bfIndex = weeks.findIndex(w => w.weekStart <= state.blackFriday && state.blackFriday < addDaysISO(w.weekStart, 7));
+  const every = Math.max(1, Math.ceil(64 / Math.max(1, colsWidth / Math.max(1, weeks.length))));
+  const showLabel = (i: number) => i === bfIndex || (i % every === 0 && Math.abs(i - bfIndex) >= every);
+
   const H = 230;
   const posH = (H * max) / (max + min || 1);
   const negH = H - posH;
@@ -74,17 +89,16 @@ function SalesCard() {
   return (
     <div className="card hero">
       <div className="hero-main">
-        <div className="row" style={{ alignItems: 'flex-start' }}>
+        <div className="hero-head">
           <div>
             <div className="hero-figure">{data ? usd(total) : '—'}</div>
             <div className="card-sub" style={{ marginTop: 6 }}>Projected sales to Dec 31 under the current plan</div>
           </div>
-          <div className="spacer" style={{ flex: 1 }} />
           <select className="select-pill" value={productId} onChange={e => setProductId(e.target.value)} aria-label="Product">
             {state.products.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
-        <div className="legend" style={{ justifyContent: 'flex-end', marginTop: 10 }}>
+        <div className="legend" style={{ justifyContent: 'flex-end', marginTop: 14 }}>
           <span><i className="sw straw" />Pre-ordered</span>
           <span><i className="sw lime" />Sold</span>
           <span><i className="sw apricot" />Lost (sold out)</span>
@@ -96,14 +110,14 @@ function SalesCard() {
             ))}
           </div>
           <div className="chart-zero" style={{ top: posH }} />
-          <div className="chart-cols">
+          <div className="chart-cols" ref={colsRef}>
             {(data?.weeks ?? []).map((w, i) => {
               const isBF = w.weekStart <= state.blackFriday && state.blackFriday < addDaysISO(w.weekStart, 7);
               const s = (v: number) => `${(v / (max || 1)) * posH}px`;
               const n = (v: number) => `${(v / (min || 1)) * negH}px`;
               const empty = w.sold + w.preordered === 0;
               return (
-                <div key={w.weekStart} className={`chart-col ${isBF ? 'bf' : ''} ${hover === i ? 'on' : ''} ${!isBF && (data?.weeks.length ?? 0) > 9 && i % 2 === 1 ? 'skip' : ''}`} style={{ ['--pos' as string]: `${posH}px`, ['--neg' as string]: `${negH}px` }} onMouseEnter={() => setHover(i)}>
+                <div key={w.weekStart} className={`chart-col ${isBF ? 'bf' : ''} ${hover === i ? 'on' : ''} ${showLabel(i) ? '' : 'skip'}`} style={{ ['--pos' as string]: `${posH}px`, ['--neg' as string]: `${negH}px` }} onMouseEnter={() => setHover(i)}>
                   <div className="pos">
                     {empty ? <div className="seg ghost" style={{ height: 14 }} /> : null}
                     {w.preordered > 0 && <div className="seg fill-straw" style={{ height: s(w.preordered) }} />}
@@ -130,7 +144,7 @@ function SalesCard() {
         <div className="stat">
           <div className="label">Pre-orders captured</div>
           <div className="value">{usd(k.preorderRevenue)}</div>
-          <div className="foot"><Icon name="arrow-up" size={15} className="up" /><span className="up">{k.preorders}</span> open orders via PayPal</div>
+          <div className="foot"><Icon name="arrow-up" size={15} className="up" /><span className="up">{k.preorders}</span> open orders</div>
         </div>
         <div className="stat">
           <div className="label">Paid to suppliers</div>
@@ -176,7 +190,7 @@ function ReadinessCard() {
         <span className={`badge ${share >= 100 ? 'green' : share > 0 ? 'amber' : 'red'}`}>{share >= 100 ? 'Covered' : share > 0 ? 'Short' : 'Not covered'}</span>
       </div>
       <div className="card-b">
-        <div className="hbar" style={{ marginTop: 18 }}>
+        <div className="hbar" style={{ marginTop: 8 }}>
           <span className={share >= 100 ? 'fill-lime' : 'fill-apricot'} style={{ width: `${Math.max(share, 2)}%` }} />
         </div>
         <div className="row small" style={{ justifyContent: 'space-between', marginTop: 10 }}>
@@ -270,7 +284,7 @@ function MoneyCard() {
           {groups.map(g => (
             <div key={g.key}><i className={`sw ${g.fill}`} /><span>{g.label}</span><b>{usd(g.amount)}</b></div>
           ))}
-          {pays.slice(0, 4).map(p => (
+          {pays.slice(0, 2).map(p => (
             <div key={p.id} style={{ color: 'var(--ink-3)' }}><i className="sw grey" /><span>{p.poId} · {p.label}</span><b>{Math.round(pct(p.amount, total))}%</b></div>
           ))}
         </div>
@@ -344,7 +358,7 @@ function ShipmentsCard() {
         <div className="spacer" />
         <Link to="/intake" className="btn icon" aria-label="Add a purchase order"><Icon name="plus" size={16} /></Link>
       </div>
-      <div className="card-b" style={{ paddingTop: 8 }}>
+      <div className="card-b goals" style={{ paddingTop: 8 }}>
         {state.purchaseOrders.map((po: any) => {
           const product = state.products.find((p: any) => p.id === po.productId);
           const lands = po.keyDates?.airLaunch ?? po.keyDates?.launch;
@@ -387,7 +401,7 @@ function PayPalPanel() {
         <div className="paycard-wrap">
           <div className="paycard">
             <div className="row" style={{ justifyContent: 'space-between' }}>
-              <span className="small">Pre-orders captured</span>
+              <span className="small">Captured</span>
               <span className="brand">PayPal</span>
             </div>
             <div className="fig num">{usd(k.preorderRevenue)}</div>
