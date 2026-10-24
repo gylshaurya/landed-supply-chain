@@ -51,7 +51,7 @@ const SubmitSchema = z.object({
   customerNoticeSubject: z.string(),
   customerNoticeBody: z
     .string()
-    .describe('Email template for affected pre-order customers. Must use placeholders {{name}}, {{order_id}}, {{original_date}}, {{revised_date}}, {{keep_link}}, {{cancel_link}}. Warm, honest, short.'),
+    .describe('Email template for affected pre-order customers, signed by the merchant. Must use placeholders {{name}}, {{order_id}}, {{original_date}}, {{revised_date}}, {{keep_link}}, {{cancel_link}} and say that cancelling is free, takes one click and gives a full refund. Warm, honest, short.'),
   supplierMessage: z.string().describe('short message back to the supplier confirming what you need from them'),
   goodwillCredit: z.number().describe('USD refunded to each customer who chooses to wait, 0 for none'),
 });
@@ -68,6 +68,7 @@ How to work:
 - You may call simulate_option several times in one turn to compare options side by side.
 - Explore with simulate_option. Always simulate "Wait it out" (no action) as the reference. If the supplier offered paid overtime, try it alone and combined with air freight. Air cargo space is limited, so try a few air quantities up to the cap — numbers beat intuition. Try a goodwill credit of $5 only if customers will still be late.
 - Compare on total impact (lost revenue + expected refunds + extra costs + broken-promise cost, i.e. support load and PayPal item-not-received dispute risk). Also weigh hitting Black Friday and the number of customers who get a broken promise.
+- You write on behalf of the merchant named in get_situation; sign customer emails with that name.
 - The FTC Mail Order Rule requires that customers whose promised date slips get a notice with the revised date and a free option to cancel for a full refund. Write that notice as a template with the required placeholders. Do not promise anything the plan does not deliver.
 - Finish by calling submit_plan exactly once. Keep text plain and specific; no markdown headings.`;
 
@@ -113,6 +114,7 @@ export async function runRecoveryAgent(
       run: async () => {
         const preUnits = db.preorders.filter(p => p.productId === product.id && (p.status === 'active' || p.status === 'kept')).reduce((s, p) => s + p.qty, 0);
         const out = {
+          merchant: db.merchant.name,
           today: today(),
           blackFriday: BLACK_FRIDAY,
           purchaseOrder: { id: po.id, quantity: po.quantity, unitCost: po.unitCost, route: `${po.originPort} → ${po.destinationPort}`, mode: po.shipMode },

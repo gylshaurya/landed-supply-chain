@@ -23,8 +23,10 @@ export function enforceCompliance(body: string): string {
   let out = body;
   const checks = ftcChecks(out);
   if (!checks[0].ok) out += '\n\nYour new estimated ship date is {{revised_date}}.';
-  if (!checks[1].ok || !checks[2].ok || !checks[3].ok) {
+  if (!checks[1].ok || !checks[2].ok) {
     out += '\n\nIf you would rather not wait, you can cancel at no cost with one click for a full refund to your PayPal account: {{cancel_link}}';
+  } else if (!checks[3].ok) {
+    out += '\n\nCancelling is free and takes one click.';
   }
   return out;
 }

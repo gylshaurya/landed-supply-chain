@@ -33,20 +33,41 @@ export function modelName() {
   return aiProvider() === 'gemini' ? config.geminiModel : config.model;
 }
 
-/** Free-tier Gemini quotas are per minute; back off and retry instead of failing the agent. */
-async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await fn();
-    } catch (e) {
-      const status = e instanceof ApiError ? e.status : 0;
-      if (attempt >= 5 || !(status === 429 || status === 500 || status === 503)) throw e;
-      const hinted = /retry in ([\d.]+)s/i.exec((e as Error).message)?.[1];
-      const wait = hinted ? Math.ceil(Number(hinted) * 1000) + 500 : 4000 * (attempt + 1);
-      console.warn(`[gemini] ${label}: ${status}, retrying in ${Math.round(wait / 1000)}s`);
-      await new Promise(r => setTimeout(r, wait));
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+const retryable = (e: unknown) => {
+  const status = e instanceof ApiError ? e.status : 0;
+  return status === 429 || status === 500 || status === 503 || status === 504 || /timed? ?out|aborted|fetch failed/i.test(String((e as Error)?.message));
+};
+
+/**
+ * Calls Gemini with retries and model fallback. Free-tier models are often
+ * briefly overloaded (503) or rate limited (429): back off, then move down the
+ * fallback list. `session.model` makes the choice sticky for a multi-turn
+ * agent so a conversation stays on one model once it has started.
+ */
+async function generate(params: Omit<Parameters<GoogleGenAI['models']['generateContent']>[0], 'model'>, label: string, session: { model?: string; started?: boolean } = {}) {
+  const chain = session.model ? [session.model] : [config.geminiModel, ...config.geminiFallbacks.filter(m => m !== config.geminiModel)];
+  let lastError: unknown;
+  for (const model of chain) {
+    const attempts = session.started ? 6 : 2;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        const res = await geminiClient().models.generateContent({ ...params, model, config: { ...params.config, httpOptions: { timeout: 90_000 } } });
+        if (!session.model) console.log(`[gemini] ${label} → ${model}`);
+        session.model = model;
+        session.started = true;
+        return res;
+      } catch (e) {
+        lastError = e;
+        if (!retryable(e)) throw e;
+        const hinted = /retry in ([\d.]+)s/i.exec((e as Error).message)?.[1];
+        const wait = hinted ? Math.min(30_000, Math.ceil(Number(hinted) * 1000) + 500) : 2500 * (attempt + 1);
+        console.warn(`[gemini] ${label} on ${model}: ${(e as ApiError).status ?? 'error'} — ${attempt + 1 < attempts ? `retrying in ${Math.round(wait / 1000)}s` : 'trying next model'}`);
+        if (attempt + 1 < attempts) await sleep(wait);
+      }
     }
   }
+  throw lastError;
 }
 
 function toGeminiParts(content: InputPart[] | string): Part[] {
@@ -88,18 +109,16 @@ export async function structured<S extends z.ZodType>(opts: { schema: S; system:
   if (aiProvider() === 'anthropic') {
     return claudeStructured({ schema: opts.schema, system: opts.system, content: toClaudeContent(opts.content) as never, effort: opts.effort });
   }
-  const res = await withRetry(
-    () =>
-      geminiClient().models.generateContent({
-        model: config.geminiModel,
-        contents: [{ role: 'user', parts: toGeminiParts(opts.content) }],
-        config: {
-          systemInstruction: opts.system,
-          responseMimeType: 'application/json',
-          responseJsonSchema: geminiSchema(opts.schema),
-          maxOutputTokens: 16000,
-        },
-      }),
+  const res = await generate(
+    {
+      contents: [{ role: 'user', parts: toGeminiParts(opts.content) }],
+      config: {
+        systemInstruction: opts.system,
+        responseMimeType: 'application/json',
+        responseJsonSchema: geminiSchema(opts.schema),
+        maxOutputTokens: 16000,
+      },
+    },
     'structured',
   );
   const text = res.text ?? '';
@@ -135,18 +154,13 @@ export async function runToolAgent(opts: { system: string; prompt: string; tools
 
   const declarations = opts.tools.map(t => ({ name: t.name, description: t.description, parametersJsonSchema: geminiSchema(t.schema) }));
   const contents: Content[] = [{ role: 'user', parts: [{ text: opts.prompt }] }];
+  const session: { model?: string; started?: boolean } = {};
   for (let i = 0; i < max && !opts.isDone(); i++) {
-    const res = await withRetry(
-      () =>
-        geminiClient().models.generateContent({
-          model: config.geminiModel,
-          contents,
-          config: { systemInstruction: opts.system, tools: [{ functionDeclarations: declarations }], maxOutputTokens: 16000 },
-        }),
-      'agent',
-    );
+    const started = Date.now();
+    const res = await generate({ contents, config: { systemInstruction: opts.system, tools: [{ functionDeclarations: declarations }], maxOutputTokens: 16000 } }, 'agent', session);
     const modelContent = res.candidates?.[0]?.content;
     const calls = res.functionCalls ?? [];
+    if (process.env.LANDED_DEBUG_AI) console.log(`[gemini] turn ${i}: ${Date.now() - started}ms, finish=${res.candidates?.[0]?.finishReason}, calls=${calls.map(c => c.name).join(',') || 'none'}`);
     if (!modelContent || !calls.length) {
       // Nudge once if the model answered in prose instead of submitting.
       if (i < max - 1 && !opts.isDone()) {

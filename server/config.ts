@@ -10,6 +10,8 @@ export const config = {
   model: env.LANDED_MODEL || 'claude-opus-5-5',
   geminiKey: env.GEMINI_API_KEY || '',
   geminiModel: env.GEMINI_MODEL || 'gemini-flash-latest',
+  /** Tried in order when the primary model is overloaded (503) or out of free quota (429) */
+  geminiFallbacks: (env.GEMINI_FALLBACK_MODELS || 'gemini-3.5-flash,gemini-3-flash-preview,gemini-2.5-flash').split(',').map(s => s.trim()).filter(Boolean),
   provider: (env.LANDED_AI_PROVIDER || '').toLowerCase(),
   paypal: {
     clientId: env.PAYPAL_CLIENT_ID || '',

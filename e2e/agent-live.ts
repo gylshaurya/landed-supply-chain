@@ -1,0 +1,17 @@
+import 'dotenv/config';
+import { buildSeed } from '../server/seed/data.js';
+import { useDb } from '../server/db.js';
+import { runRecoveryAgent, parseSupplierUpdate } from '../server/ai/recovery.js';
+const db = buildSeed();
+useDb(db);
+const msg = 'Our second kiln failed. Production of PO-1042 needs 12 more days. Pay $1,800 overtime and we save 5 days.';
+const t0 = Date.now();
+const parsed = await parseSupplierUpdate(db, 'PO-1042', msg);
+console.log('parsed', Date.now() - t0, 'ms', JSON.stringify(parsed));
+const r = await runRecoveryAgent(db, 'PO-1042', { ...parsed, message: msg }, t => console.log('  trace', t.tool, t.summary));
+console.log('DONE', Date.now() - t0, 'ms');
+console.log(r.proposal.headline);
+console.log(r.proposal.rationale);
+console.log(r.proposal.customerNotice.body);
+console.log(r.proposal.ftcChecks);
+process.exit(0);
