@@ -7,8 +7,8 @@ import { SAMPLE_DELAY } from '../components/DelayComposer';
 import { Icon } from '../components/Icon';
 
 const SETS = {
-  good: ['qc-good-1.png', 'qc-good-2.png'],
-  bad: ['qc-bad-1.png', 'qc-bad-2.png'],
+  good: ['qc-good-1.jpg', 'qc-good-2.png'],
+  bad: ['qc-bad-1.jpg', 'qc-bad-2.png'],
 };
 
 interface Photo {

@@ -116,8 +116,17 @@ function SalesCard() {
               const s = (v: number) => `${(v / (max || 1)) * posH}px`;
               const n = (v: number) => `${(v / (min || 1)) * negH}px`;
               const empty = w.sold + w.preordered === 0;
+              const today = state.modes.today as string;
+              const hasToday = w.weekStart <= today && today < addDaysISO(w.weekStart, 7);
+              // Position inside the week column: Monday = left edge, Sunday = right edge.
+              const todayAt = hasToday ? ((new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7 + 0.5) / 7 : 0;
               return (
                 <div key={w.weekStart} className={`chart-col ${isBF ? 'bf' : ''} ${hover === i ? 'on' : ''} ${showLabel(i) ? '' : 'skip'}`} style={{ ['--pos' as string]: `${posH}px`, ['--neg' as string]: `${negH}px` }} onMouseEnter={() => setHover(i)}>
+                  {hasToday && (
+                    <div className="today-mark" style={{ left: `${todayAt * 100}%` }} aria-label={`Today, ${fmtDate(today)}`}>
+                      <span>Today</span>
+                    </div>
+                  )}
                   <div className="pos">
                     {empty ? <div className="seg ghost" style={{ height: 14 }} /> : null}
                     {w.preordered > 0 && <div className="seg fill-straw" style={{ height: s(w.preordered) }} />}

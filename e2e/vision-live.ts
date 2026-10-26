@@ -7,9 +7,9 @@ import { readPurchaseOrder } from '../server/ai/intake.js';
 const db = buildSeed();
 const po = db.purchaseOrders[0];
 const s = (n: string) => path.resolve('public/samples', n);
-for (const set of [['qc-bad-1.png', 'qc-bad-2.png'], ['qc-good-1.png', 'qc-good-2.png']]) {
+for (const set of [['qc-bad-1.jpg', 'qc-bad-2.png'], ['qc-good-1.jpg', 'qc-good-2.png']]) {
   const t = Date.now();
-  const r = await inspect(po, set.map(s), s('golden-sample.png'));
+  const r = await inspect(po, set.map(s), s('golden-sample.jpg'));
   console.log(`\n${set.join('+')} (${Date.now() - t}ms): ${r.verdict} conf=${r.confidence} defects=${r.defects.length}`);
   console.log(' ', r.summary);
   for (const c of r.checks) console.log('   ', c.result.padEnd(7), c.name, '—', c.note);

@@ -48,8 +48,8 @@ export function buildSeed(): DB {
   const tasks: Task[] = [
     // PO-1042 — the hero shipment
     t({ id: 'g-1042', poId: 'PO-1042', name: 'PO-1042 · Pour-over set × 1,200 · Jingdezhen → Long Beach', kind: 'group', duration: 0 }),
-    t({ id: '1042-deposit', poId: 'PO-1042', parentId: 'g-1042', name: '30% deposit to Hongye Ceramics', kind: 'payment', duration: 0, manual: true, start: '2026-09-21', percentDone: 100, paymentId: 'pay-1042-dep', resourceId: 'r-merchant' }),
-    t({ id: '1042-prod', poId: 'PO-1042', parentId: 'g-1042', name: 'Production run · glazing & kiln firing', kind: 'production', duration: 42, manual: true, start: '2026-09-22', percentDone: 70, resourceId: 'r-factory' }),
+    t({ id: '1042-deposit', poId: 'PO-1042', parentId: 'g-1042', name: '30% deposit to Hongye Glassworks', kind: 'payment', duration: 0, manual: true, start: '2026-09-21', percentDone: 100, paymentId: 'pay-1042-dep', resourceId: 'r-merchant' }),
+    t({ id: '1042-prod', poId: 'PO-1042', parentId: 'g-1042', name: 'Production run · glass blowing & annealing', kind: 'production', duration: 42, manual: true, start: '2026-09-22', percentDone: 70, resourceId: 'r-factory' }),
     t({ id: '1042-qc', poId: 'PO-1042', parentId: 'g-1042', name: 'Pre-shipment QC inspection (AI-verified)', kind: 'qc', duration: 2, resourceId: 'r-qc' }),
     t({ id: '1042-balance', poId: 'PO-1042', parentId: 'g-1042', name: '70% balance · released only on QC pass', kind: 'payment', duration: 0, paymentId: 'pay-1042-bal', resourceId: 'r-merchant' }),
     t({ id: '1042-load', poId: 'PO-1042', parentId: 'g-1042', name: 'Truck to Shanghai port & load container', kind: 'freight', duration: 2, resourceId: 'r-forwarder' }),
@@ -91,12 +91,12 @@ export function buildSeed(): DB {
     version: 1,
     merchant: { name: 'Kiln & Co', email: 'ops@kilnandco.example' },
     products: [
-      { id: 'pour-over', name: 'Speckled Sage Pour-Over Set', sku: 'KC-POS-01', price: 68, image: '/samples/product-pour-over.png', stockOnHand: 0, dailyVelocity: 7, promisedShipDate: '2026-11-26', preorderOpen: true, blurb: 'Hand-glazed stoneware dripper with a 600 ml glass carafe. Our best-seller — sold out until the next kiln batch lands.' },
-      { id: 'apron', name: 'Heavy Linen Barista Apron', sku: 'KC-APR-02', price: 42, image: '/samples/product-apron.png', stockOnHand: 22, dailyVelocity: 3, promisedShipDate: '2026-10-31', preorderOpen: false, blurb: 'Stonewashed Portuguese linen with leather straps.' },
-      { id: 'scoop', name: 'Walnut Coffee Scoop', sku: 'KC-SCP-03', price: 18, image: '/samples/product-scoop.png', stockOnHand: 64, dailyVelocity: 4, promisedShipDate: '2026-11-12', preorderOpen: false, blurb: 'Hand-turned Oregon black walnut, one level scoop = 12 g.' },
+      { id: 'pour-over', name: 'Glass Pour-Over Set', sku: 'KC-POS-01', price: 68, image: '/samples/product-pour-over.jpg', stockOnHand: 0, dailyVelocity: 7, promisedShipDate: '2026-11-26', preorderOpen: true, blurb: 'Hand-blown borosilicate glass dripper with a 600 ml glass server. Our best-seller — sold out until the next batch lands.' },
+      { id: 'apron', name: 'Canvas Barista Apron', sku: 'KC-APR-02', price: 42, image: '/samples/product-apron.jpg', stockOnHand: 22, dailyVelocity: 3, promisedShipDate: '2026-10-31', preorderOpen: false, blurb: 'Heavy black cotton canvas with a leather patch and tool pockets.' },
+      { id: 'scoop', name: 'Walnut Coffee Scoop', sku: 'KC-SCP-03', price: 18, image: '/samples/product-scoop.jpg', stockOnHand: 64, dailyVelocity: 4, promisedShipDate: '2026-11-12', preorderOpen: false, blurb: 'Hand-turned Oregon black walnut, one level scoop = 12 g.' },
     ],
     suppliers: [
-      { id: 'hongye', name: 'Hongye Ceramics', country: 'China', contact: 'Wei Lin', paypalEmail: supplierEmail },
+      { id: 'hongye', name: 'Hongye Glassworks', country: 'China', contact: 'Wei Lin', paypalEmail: supplierEmail },
       { id: 'ribeira', name: 'Tecelagem Ribeira', country: 'Portugal', contact: 'Inês Costa', paypalEmail: supplierEmail },
       { id: 'cascade', name: 'Cascade Woodworks', country: 'USA', contact: 'Sam Whitaker', paypalEmail: supplierEmail },
     ],
@@ -104,17 +104,17 @@ export function buildSeed(): DB {
       {
         id: 'PO-1042', supplierId: 'hongye', productId: 'pour-over', quantity: 1200, unitCost: 18.5, currency: 'USD', incoterm: 'FOB Shanghai', originPort: 'Shanghai (CNSHA)', destinationPort: 'Long Beach (USLGB)', shipMode: 'sea', status: 'in_production',
         spec: {
-          Glaze: 'Speckled sage green, satin finish — must match approved sample',
-          Dripper: 'Cone dripper with ridged interior and 3 drain holes',
-          Carafe: '600 ml borosilicate glass carafe',
-          Mark: 'Debossed "KILN & CO" mark on dripper',
+          Dripper: 'Clear borosilicate glass cone dripper with spiral ribs and a side handle',
+          Server: '600 ml clear borosilicate glass server with handle',
+          Glass: 'Crystal clear, no bubbles, cracks or chips; smooth fire-polished rims',
+          Match: 'Shape and handle must match the approved golden sample',
           Packaging: 'Kraft carton, label reads KILN & CO · POUR-OVER SET · SKU KC-POS-01',
         },
-        qcRequirements: ['Glaze colour matches the approved sage sample', 'No cracks, chips or glaze defects', 'Carton label shows SKU KC-POS-01', 'Kiln & Co mark present and legible'],
+        qcRequirements: ['Dripper and server match the approved sample', 'No cracks, chips or broken rims', 'Glass is clear with no bubbles or cloudiness', 'Carton label shows SKU KC-POS-01'],
       },
       {
         id: 'PO-1043', supplierId: 'ribeira', productId: 'apron', quantity: 600, unitCost: 9.8, currency: 'USD', incoterm: 'FOB Leixões', originPort: 'Leixões (PTLEI)', destinationPort: 'Newark (USEWR)', shipMode: 'sea', status: 'in_transit',
-        spec: { Fabric: '280 gsm stonewashed linen, charcoal', Straps: 'Veg-tan leather, riveted' }, qcRequirements: ['Stitching straight, no loose threads', 'Correct charcoal colour'],
+        spec: { Fabric: 'Heavy black cotton canvas', Details: 'Leather patch, two front pockets, adjustable neck strap' }, qcRequirements: ['Stitching straight, no loose threads', 'Correct black colour, no fading'],
       },
       {
         id: 'PO-1044', supplierId: 'cascade', productId: 'scoop', quantity: 400, unitCost: 4.2, currency: 'USD', incoterm: 'Delivered', originPort: 'Eugene, OR', destinationPort: 'Ontario, CA', shipMode: 'ground', status: 'in_production',
@@ -132,7 +132,7 @@ export function buildSeed(): DB {
     dependencies,
     resources: [
       { id: 'r-merchant', name: 'Kiln & Co (you)', role: 'Merchant', country: 'USA' },
-      { id: 'r-factory', name: 'Hongye Ceramics', role: 'Factory', country: 'China' },
+      { id: 'r-factory', name: 'Hongye Glassworks', role: 'Factory', country: 'China' },
       { id: 'r-porto', name: 'Tecelagem Ribeira', role: 'Factory', country: 'Portugal' },
       { id: 'r-oregon', name: 'Cascade Woodworks', role: 'Workshop', country: 'USA' },
       { id: 'r-qc', name: 'Landed QC agent', role: 'Inspection', country: '—' },
@@ -145,7 +145,7 @@ export function buildSeed(): DB {
     proposals: [],
     activity: [
       { id: 'seed-a3', ts: '2026-10-22T16:10:00Z', actor: 'system', type: 'forecast', title: 'Pour-over pre-orders passed 170', detail: 'All captured through PayPal and promised to ship by Nov 26.' },
-      { id: 'seed-a2', ts: '2026-10-15T09:00:00Z', actor: 'supplier', type: 'update', title: 'Hongye Ceramics: production 70% complete', detail: 'Second kiln batch is glazing. On track for Nov 3.' },
+      { id: 'seed-a2', ts: '2026-10-15T09:00:00Z', actor: 'supplier', type: 'update', title: 'Hongye Glassworks: production 70% complete', detail: 'Second batch is in the annealing kiln. On track for Nov 3.' },
       { id: 'seed-a1', ts: '2026-10-03T12:00:00Z', actor: 'paypal', type: 'payout', title: 'Balance paid to Tecelagem Ribeira · $2,940', detail: 'Released automatically after the QC agent passed the batch.' },
     ],
     outbox: [],

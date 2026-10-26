@@ -39,10 +39,10 @@ describe('end-to-end recovery flow', () => {
 
   it('QC gate: defects hold the balance, a clean batch releases it via PayPal', async () => {
     const s = (n: string) => path.resolve('public/samples', n);
-    const bad = await svc.runQc('PO-1042', [s('qc-bad-1.png'), s('qc-bad-2.png')], []);
+    const bad = await svc.runQc('PO-1042', [s('qc-bad-1.jpg'), s('qc-bad-2.png')], []);
     expect(bad.verdict).toBe('fail');
     expect(getDb().payments.find(p => p.id === 'pay-1042-bal')!.status).toBe('held');
-    const good = await svc.runQc('PO-1042', [s('qc-good-1.png'), s('qc-good-2.png')], []);
+    const good = await svc.runQc('PO-1042', [s('qc-good-1.jpg'), s('qc-good-2.png')], []);
     expect(good.decision).toBe('released');
     expect(getDb().payments.find(p => p.id === 'pay-1042-bal')!.status).toBe('paid');
   });

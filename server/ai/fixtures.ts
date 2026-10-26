@@ -68,7 +68,7 @@ export function demoRecovery(db: DB, poId: string, update: SupplierUpdate, simul
     rationale: `Waiting pushes every pre-order to ${fmt(wait.firstShipDate)}, after Black Friday (${fmt(BLACK_FRIDAY)}), breaking ${wait.preordersLate} promises and losing an estimated $${wait.lostRevenue.toLocaleString()} in sales. ${best.label} costs $${(best.airCost + best.overtimeCost).toLocaleString()} up front but ships the first units ${fmt(best.firstShipDate)}, so ${best.preordersLate === 0 ? 'no pre-order customer gets a broken promise' : `${best.preordersLate} customers are late`} and Black Friday demand is covered. The remaining units follow by sea on ${fmt(best.fullRestockDate)}.`,
     customerNoticeSubject: 'An update on your Kiln & Co pre-order',
     customerNoticeBody:
-      'Hi {{name}},\n\nOur kiln partner in Jingdezhen hit a production delay, so your pour-over set (order {{order_id}}) will ship on {{revised_date}} instead of {{original_date}}. We are sorry — we would rather tell you now than surprise you later.\n\nYou have two options:\n• Keep your order — no action needed, or confirm here: {{keep_link}}\n• Cancel at no cost with one click for a full refund to your PayPal account: {{cancel_link}}\n\nThank you for your patience,\nThe Kiln & Co team',
+      'Hi {{name}},\n\nOur glassworks partner hit a production delay, so your pour-over set (order {{order_id}}) will ship on {{revised_date}} instead of {{original_date}}. We are sorry — we would rather tell you now than surprise you later.\n\nYou have two options:\n• Keep your order — no action needed, or confirm here: {{keep_link}}\n• Cancel at no cost with one click for a full refund to your PayPal account: {{cancel_link}}\n\nThank you for your patience,\nThe Kiln & Co team',
     supplierMessage: best.overtimeDays
       ? `Approved: please run the overtime shifts (+$${best.overtimeCost.toLocaleString()}) and pack the first ${best.airUnits} sets for air freight as soon as QC passes.`
       : `Understood. Please pack the first ${best.airUnits} sets for air freight as soon as QC passes.`,
@@ -85,32 +85,31 @@ export function demoQc(photos: string[]): Omit<QcReport, 'id' | 'poId' | 'create
     return {
       verdict: 'fail',
       confidence: 0.86,
-      summary: 'Glaze colour is off-spec (blue-teal instead of sage) and one dripper shows a hairline crack; the carton label reads KC-POS-10 instead of KC-POS-01.',
+      summary: 'The dripper rim is chipped and broken on one side, and the carton label reads KC-POS-10 instead of KC-POS-01.',
       checks: [
-        { name: 'Glaze colour matches the approved sage sample', result: 'fail', note: 'Visibly bluer than the reference.' },
-        { name: 'No cracks, chips or glaze defects', result: 'fail', note: 'Hairline crack running up from the base.' },
+        { name: 'Dripper and server match the approved sample', result: 'pass', note: 'Same shape and handle as the sample.' },
+        { name: 'No cracks, chips or broken rims', result: 'fail', note: 'Dripper rim is chipped and broken.' },
+        { name: 'Glass is clear with no bubbles or cloudiness', result: 'pass', note: 'Clear glass.' },
         { name: 'Carton label shows SKU KC-POS-01', result: 'fail', note: 'Label reads KC-POS-10.' },
-        { name: 'Kiln & Co mark present and legible', result: 'pass', note: 'Mark visible.' },
       ],
       defects: [
-        { type: 'Colour deviation', severity: 'major', description: 'Glaze is blue-teal, not speckled sage.', photoIndex: 0 },
-        { type: 'Crack', severity: 'critical', description: 'Hairline crack on the dripper body.', photoIndex: 0 },
+        { type: 'Broken rim', severity: 'critical', description: 'The dripper rim is chipped and broken on one side.', photoIndex: 0 },
         { type: 'Labelling', severity: 'major', description: 'Wrong SKU printed on carton.', photoIndex: 1 },
       ],
-      estimatedDefectRatePct: 12,
-      supplierMessage: 'Batch failed inspection: off-spec glaze colour, cracked dripper, and cartons printed KC-POS-10. Please re-fire and relabel before we release the balance.',
+      estimatedDefectRatePct: 9,
+      supplierMessage: 'Batch failed inspection: a dripper with a chipped, broken rim and cartons printed KC-POS-10. Please re-check the batch and relabel before we release the balance.',
     };
   }
   if (good) {
     return {
       verdict: 'pass',
       confidence: 0.91,
-      summary: 'Speckled sage glaze matches the sample, no visible cracks or chips, Kiln & Co mark is crisp and the carton label reads SKU KC-POS-01.',
+      summary: 'Dripper and server match the approved sample, the glass is clear with no cracks or chips, and the carton label reads SKU KC-POS-01.',
       checks: [
-        { name: 'Glaze colour matches the approved sage sample', result: 'pass', note: 'Sage with dark speckle.' },
-        { name: 'No cracks, chips or glaze defects', result: 'pass', note: 'Clean surfaces.' },
+        { name: 'Dripper and server match the approved sample', result: 'pass', note: 'Matches the sample.' },
+        { name: 'No cracks, chips or broken rims', result: 'pass', note: 'Rims intact.' },
+        { name: 'Glass is clear with no bubbles or cloudiness', result: 'pass', note: 'Clear glass.' },
         { name: 'Carton label shows SKU KC-POS-01', result: 'pass', note: 'Correct SKU.' },
-        { name: 'Kiln & Co mark present and legible', result: 'pass', note: 'Legible.' },
       ],
       defects: [],
       estimatedDefectRatePct: 0.8,

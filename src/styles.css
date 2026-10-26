@@ -259,7 +259,7 @@ label.f { display: grid; gap: 7px; font-weight: 500; font-size: 13.5px; }
 .chart-grid div { border-top: 1px solid var(--line-2); position: relative; }
 .chart-grid div span { position: absolute; left: -36px; top: -8px; width: 30px; text-align: right; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .chart-cols { position: relative; margin-left: 34px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
-.chart-col { min-width: 0; display: grid; grid-template-rows: var(--pos) var(--neg) 24px; cursor: default; }
+.chart-col { position: relative; min-width: 0; display: grid; grid-template-rows: var(--pos) var(--neg) 24px; cursor: default; }
 .chart-col .pos { display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; }
 .chart-col .neg { display: flex; flex-direction: column; justify-content: flex-start; padding-top: 3px; }
 .chart-col .seg { border-radius: 7px; min-height: 0; transition: height 0.8s var(--ease), filter 0.2s; }
@@ -267,6 +267,8 @@ label.f { display: grid; gap: 7px; font-weight: 500; font-size: 13.5px; }
 .chart-col:hover .seg:not(.ghost), .chart-col.on .seg:not(.ghost) { filter: saturate(1.15); }
 .chart-col .lbl { text-align: center; font-size: 12px; color: var(--ink-3); padding-top: 6px; white-space: nowrap; overflow: visible; }
 .chart-col.skip .lbl { visibility: hidden; }
+.today-mark { position: absolute; top: -6px; bottom: 24px; width: 0; border-left: 1.5px dashed var(--ink); z-index: 2; pointer-events: none; }
+.today-mark span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 6px; white-space: nowrap; }
 .chart-col.bf .lbl { color: var(--ink); font-weight: 500; }
 .chart-zero { position: absolute; left: 34px; right: 0; border-top: 1px dashed #d8d8d2; }
 .chart-tip { position: absolute; z-index: 5; background: var(--panel); border-radius: 12px; box-shadow: 0 10px 28px rgba(20, 20, 20, 0.12); padding: 10px 12px; font-size: 12.5px; min-width: 190px; pointer-events: none; transform: translate(-50%, -100%); }

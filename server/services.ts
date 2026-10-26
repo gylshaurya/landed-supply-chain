@@ -68,7 +68,7 @@ export async function runQc(poId: string, photoPaths: string[], publicPaths: str
   if (!po) throw new Error('Unknown PO');
   log({ actor: 'supplier', type: 'qc_photos', title: `${po.id}: ${photoPaths.length} QC photos uploaded`, detail: 'Inspection agent is checking them against the spec and golden sample.' });
   bus.emit('agent', { kind: 'qc_start', poId });
-  const reference = path.resolve('public/samples/golden-sample.png');
+  const reference = path.resolve('public/samples/golden-sample.jpg');
   const result = await inspect(po, photoPaths, po.id === 'PO-1042' ? reference : undefined);
   const balance = db.payments.find(p => p.poId === poId && p.gate === 'qc_pass' && p.status !== 'paid');
   const passes = result.verdict === 'pass' && result.confidence >= 0.75 && !result.defects.some(d => d.severity === 'critical');
@@ -404,7 +404,7 @@ export function commitIntake(intake: Intake) {
   const p = poId.replace('PO-', '');
   const productId = x.sku.toLowerCase();
   if (!db.products.some(pr => pr.id === productId)) {
-    db.products.push({ id: productId, name: x.productName, sku: x.sku, price: Math.round(x.unitCost * 3.2), image: '/samples/product-pour-over.png', stockOnHand: 0, dailyVelocity: 3, promisedShipDate: today(), preorderOpen: false, blurb: '' });
+    db.products.push({ id: productId, name: x.productName, sku: x.sku, price: Math.round(x.unitCost * 3.2), image: '/samples/product-pour-over.jpg', stockOnHand: 0, dailyVelocity: 3, promisedShipDate: today(), preorderOpen: false, blurb: '' });
   }
   let supplier = db.suppliers.find(s => s.name === x.supplierName);
   if (!supplier) {

@@ -39,7 +39,7 @@ export function Notice() {
           <img src={v.product.image} alt="" style={{ width: '100%', borderRadius: '14px 14px 0 0', display: 'block', maxHeight: 260, objectFit: 'cover' }} />
           <div className="card-b stack" style={{ padding: 24 }}>
             <h1 className="serif" style={{ fontSize: 26, fontWeight: 600 }}>Your pre-order is running late</h1>
-            <p>Hi {p.customerName.split(' ')[0]}, our kiln partner hit a production delay. Your <b>{v.product.name}</b> (order {p.id.toUpperCase()}) will now ship on <b>{fmtDate(p.revisedDate ?? p.promisedDate, { weekday: 'long', month: 'long', day: 'numeric' })}</b> instead of {fmtDate(p.originalPromisedDate ?? p.promisedDate, { month: 'long', day: 'numeric' })}.</p>
+            <p>Hi {p.customerName.split(' ')[0]}, our glassworks partner hit a production delay. Your <b>{v.product.name}</b> (order {p.id.toUpperCase()}) will now ship on <b>{fmtDate(p.revisedDate ?? p.promisedDate, { weekday: 'long', month: 'long', day: 'numeric' })}</b> instead of {fmtDate(p.originalPromisedDate ?? p.promisedDate, { month: 'long', day: 'numeric' })}.</p>
             {!done && (
               <>
                 <p className="muted small">You choose. Cancelling is free and refunds the full {usd(p.amount)} to your PayPal account right away.</p>
