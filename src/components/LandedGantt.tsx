@@ -19,8 +19,19 @@ class LandedTask extends TaskModel {
   ];
 }
 
+export type TimelineView = 'days' | 'weeks' | 'months';
+
+export const VIEW_PRESETS: Record<TimelineView, Record<string, unknown>> = {
+  days: { base: 'weekAndDayLetter', tickWidth: 30, timeResolution: { unit: 'day', increment: 1 }, headers: [{ unit: 'month', dateFormat: 'MMMM YYYY' }, { unit: 'day', dateFormat: 'D' }] },
+  weeks: { base: 'weekAndMonth', tickWidth: 70, timeResolution: { unit: 'day', increment: 1 }, headers: [{ unit: 'month', dateFormat: 'MMMM YYYY' }, { unit: 'week', dateFormat: 'MMM D' }] },
+  months: { base: 'monthAndYear', tickWidth: 150, timeResolution: { unit: 'day', increment: 1 }, headers: [{ unit: 'year', dateFormat: 'YYYY' }, { unit: 'month', dateFormat: 'MMMM' }] },
+};
+
 export interface GanttHandle {
   gantt: Gantt | null;
+  setView: (v: TimelineView) => void;
+  showPO: (poId: string | null) => void;
+  goToday: () => void;
 }
 
 interface Props {
@@ -34,6 +45,7 @@ interface Props {
   aiModel?: string;
   aiProvider?: string;
   aiLive?: boolean;
+  details?: boolean;
   onReady?: (g: Gantt) => void;
 }
 
@@ -43,7 +55,35 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
   const host = useRef<HTMLDivElement>(null);
   const ganttRef = useRef<Gantt | null>(null);
   const { version, lastChange } = useApp();
-  useImperativeHandle(ref, () => ({ get gantt() { return ganttRef.current; } }), []);
+  const goToday = () => {
+    const g = ganttRef.current as any;
+    if (!g || g.isDestroyed) return;
+    const d = new Date(`${props.today}T00:00:00`);
+    d.setDate(d.getDate() - 10);
+    void g.scrollToDate(d, { block: 'start', animate: 300 });
+  };
+  useImperativeHandle(
+    ref,
+    () => ({
+      get gantt() {
+        return ganttRef.current;
+      },
+      setView(v: TimelineView) {
+        const g = ganttRef.current as any;
+        if (!g) return;
+        g.viewPreset = VIEW_PRESETS[v];
+        goToday();
+      },
+      showPO(poId: string | null) {
+        const store = (ganttRef.current as any)?.taskStore;
+        if (!store) return;
+        if (poId) store.filter({ id: 'po', filterBy: (r: any) => r.poId === poId });
+        else store.removeFilter('po');
+      },
+      goToday,
+    }),
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   useEffect(() => {
     if (!host.current) return;
@@ -58,27 +98,20 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
         autoLoad: true,
         validateResponse: false,
       } as any,
-      subGridConfigs: { locked: { width: 540 } },
+      subGridConfigs: { locked: { width: props.details ? 660 : 330 } },
       startDate: '2026-08-24',
       endDate: '2027-01-04',
-      viewPreset: {
-        base: 'weekAndMonth',
-        timeResolution: { unit: 'day', increment: 1 },
-        headers: [
-          { unit: 'month', dateFormat: 'MMMM YYYY' },
-          { unit: 'week', dateFormat: 'MMM D' },
-        ],
-      },
-      tickSize: 58,
-      rowHeight: 42,
-      barMargin: 8,
+      viewPreset: VIEW_PRESETS.weeks,
+      rowHeight: 48,
+      barMargin: 12,
       readOnly: !editable,
       columnLines: false,
       transitionDuration: 450,
       columns: [
         {
           type: 'name',
-          width: 226,
+          flex: 1,
+          minWidth: 220,
           renderer: ({ record }: any) => ({
             children: [
               { tag: 'span', text: record.name },
@@ -86,12 +119,14 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
             ],
           }),
         },
-        { type: 'startdate', text: 'Start', width: 66, format: 'MMM D' },
-        { type: 'enddate', text: 'Finish', width: 66, format: 'MMM D' },
+        { id: 'start', type: 'startdate', text: 'Start', width: 76, format: 'MMM D', hidden: !props.details },
+        { id: 'finish', type: 'enddate', text: 'Finish', width: 76, format: 'MMM D', hidden: !props.details },
         {
+          id: 'paypal',
           text: 'PayPal',
           field: 'paymentStatus',
-          width: 158,
+          width: 170,
+          hidden: !props.details,
           htmlEncode: false,
           renderer: ({ record }: any) =>
             record.kind === 'payment'
@@ -157,6 +192,8 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
                 model: props.aiModel,
                 requireConfirmationOnRemovals: true,
                 showNoConnectionIcon: false,
+                planning: false,
+                timeout: 120000,
                 chatButton: {
                   tooltip: 'Landed Copilot (Bryntum AI)',
                   chatPanel: {
@@ -195,13 +232,11 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
     } as any);
 
     ganttRef.current = gantt;
-    // Open on the interesting window (a couple of weeks back from today) once data is in.
+    // Open on the interesting window (a little before today) once data is in.
     gantt.project.on('load', () => {
       // React StrictMode mounts twice; ignore loads that finish after an instance was destroyed.
       if ((gantt as any).isDestroyed) return;
-      const d = new Date(`${props.today}T00:00:00`);
-      d.setDate(d.getDate() - 24);
-      void (gantt as any).scrollToDate(d, { block: 'start', animate: false });
+      goToday();
     });
     props.onReady?.(gantt);
     return () => {
@@ -230,6 +265,16 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
     const g = ganttRef.current as any;
     if (g) g.features.baselines.disabled = !props.showBaselines;
   }, [props.showBaselines]);
+
+  useEffect(() => {
+    const g = ganttRef.current as any;
+    if (!g) return;
+    for (const id of ['start', 'finish', 'paypal']) {
+      const col = g.columns.getById(id);
+      if (col) col.hidden = !props.details;
+    }
+    g.subGrids.locked.width = props.details ? 660 : 330;
+  }, [props.details]);
 
   return <div className="bryntum-host" ref={host} />;
 });

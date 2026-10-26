@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+const errs = []; p.on('pageerror', e => errs.push(e.message));
+await p.goto('http://localhost:5173/timeline', { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+await p.getByRole('button', { name: 'PO-1042', exact: true }).click();
+await p.getByRole('button', { name: 'Days', exact: true }).click();
+await p.waitForTimeout(1200);
+await p.screenshot({ path: 'e2e/shots/tl-days.png' });
+const rows = await p.locator('.b-gantt .b-grid-subgrid-locked .b-grid-row').count();
+await p.getByRole('button', { name: 'Details' }).click(); await p.waitForTimeout(800);
+await p.screenshot({ path: 'e2e/shots/tl-details.png' });
+console.log('rows after filter', rows, 'errors', errs.join('|'));
+await b.close();

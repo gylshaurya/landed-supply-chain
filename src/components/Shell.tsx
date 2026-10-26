@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useApp } from '../lib/store';
-import { api, fmtDate } from '../lib/api';
+import { fmtDate } from '../lib/api';
 import { Icon } from './Icon';
 
 const TITLES: Record<string, [string, string]> = {
@@ -42,17 +42,7 @@ export function Shell() {
         <div className="sidebar-card">
           <span className="clock"><Icon name="anchor" size={17} /></span>
           <h3>{state ? `${state.daysToBlackFriday} days to Black Friday` : '…'}</h3>
-          <p>Demo clock is frozen on {fmtDate(state?.modes?.today, { weekday: 'short', month: 'short', day: 'numeric' })} so the story replays the same way.</p>
-          <button
-            className="btn primary block"
-            onClick={async () => {
-              if (!window.confirm('Reset the demo data to the starting story?')) return;
-              await api('/api/admin/reset', { method: 'POST' });
-              window.location.href = '/';
-            }}
-          >
-            <Icon name="reset" size={16} /> Reset demo
-          </button>
+          <p>Black Friday is {fmtDate(state?.blackFriday, { weekday: 'long', month: 'short', day: 'numeric' })}. Landed keeps every shipment and customer promise on track for it.</p>
         </div>
       </aside>
       <div className="main">
@@ -62,7 +52,7 @@ export function Shell() {
             <div className="sub">{sub}</div>
           </div>
           <div className="spacer" />
-          {state && <ModeBadges modes={state.modes} />}
+          {state && <PayPalChip mode={state.modes.paypal} />}
           <div className="user-chip">
             <span className="avatar" style={{ background: 'var(--lime)' }}>{merchant.slice(0, 1)}</span>
             <div className="who">
@@ -82,17 +72,11 @@ export function Shell() {
   );
 }
 
-export function ModeBadges({ modes }: { modes: any }) {
+export function PayPalChip({ mode }: { mode: string }) {
   return (
-    <>
-      <span className="chip" title={modes.ai === 'live' ? `Agents run on ${modes.model}` : 'No AI key: agents use recorded demo responses'}>
-        <span className="dot" style={{ color: modes.ai === 'live' ? 'var(--lime)' : 'var(--apricot)' }} />
-        <span>{modes.ai === 'live' ? <>{modes.provider === 'gemini' ? 'Gemini' : 'Claude'}<span className="long"> · {modes.model}</span></> : 'Demo AI'}</span>
-      </span>
-      <span className="chip" title={modes.paypal === 'sandbox' ? 'Live calls to the PayPal sandbox' : 'No PayPal credentials: calls are simulated'}>
-        <span className="dot" style={{ color: modes.paypal === 'sandbox' ? 'var(--paypal)' : 'var(--apricot)' }} />
-        <span>PayPal<span className="long">{modes.paypal === 'sandbox' ? ' sandbox' : ' simulated'}</span></span>
-      </span>
-    </>
+    <span className="chip" title={mode === 'sandbox' ? 'Live calls to the PayPal sandbox' : 'No PayPal credentials: calls are simulated'}>
+      <span className="dot" style={{ color: mode === 'sandbox' ? 'var(--paypal)' : 'var(--apricot)' }} />
+      <span>PayPal<span className="long">{mode === 'sandbox' ? ' sandbox' : ' simulated'}</span></span>
+    </span>
   );
 }

@@ -19,6 +19,7 @@ import { Outbox } from './pages/Outbox';
 import { SupplierPortal } from './pages/SupplierPortal';
 import { Store } from './pages/Store';
 import { Notice } from './pages/Notice';
+import { ResetDemo } from './pages/ResetDemo';
 import { Toaster } from './components/Toast';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <AppProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/reset" element={<ResetDemo />} />
           <Route path="/store" element={<Store />} />
           <Route path="/notice/:token" element={<Notice />} />
           <Route path="/portal/:poId" element={<SupplierPortal />} />

@@ -1,6 +1,5 @@
 import { aiMode, aiProvider, config } from '../config.js';
 import { anthropic, FALLBACK } from './client.js';
-import { geminiChain, markHealthy } from './llm.js';
 
 // Backend for Bryntum's built-in AI feature (AnthropicPlugin). The plugin sends
 // a Messages API body; we pin the model, strip parameters the current model
@@ -29,23 +28,38 @@ export async function bryntumPrompt(body: Body) {
   return msg;
 }
 
-/** Bryntum's GooglePlugin sends a Gemini REST generateContent body; forward it with the server-held key. */
+/**
+ * Bryntum's GooglePlugin sends a Gemini REST generateContent body; forward it with the server-held key.
+ * The Copilot only makes quick tool calls, so it runs on the fast "flash-lite" models with minimal
+ * thinking (~1s per turn) instead of the heavier model the recovery agent uses.
+ */
+let copilotHealthy: { model: string; until: number } | null = null;
+
 async function geminiPrompt(body: Body) {
-  const { model: _m, stream: _s, ...rest } = body;
-  const models = geminiChain();
+  const { model: _m, stream: _s, ...rest } = body as Body & { generationConfig?: Record<string, unknown> };
+  const generationConfig = { ...((rest.generationConfig as Record<string, unknown>) ?? {}), thinkingConfig: { thinkingLevel: 'minimal' } };
+  const chain = config.geminiCopilotModels;
+  const models = copilotHealthy && copilotHealthy.until > Date.now() ? [copilotHealthy.model, ...chain.filter(m => m !== copilotHealthy!.model)] : chain;
   let last: { status: number; message: string } = { status: 500, message: 'Gemini unavailable' };
   for (const model of models) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
     for (let attempt = 0; attempt < 2; attempt++) {
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.geminiKey }, body: JSON.stringify(rest), signal: AbortSignal.timeout(60_000) });
+      let res: Response;
+      try {
+        res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': config.geminiKey }, body: JSON.stringify({ ...rest, generationConfig }), signal: AbortSignal.timeout(30_000) });
+      } catch (e) {
+        last = { status: 504, message: (e as Error).message };
+        break; // timed out: move on to the next model rather than waiting again
+      }
       const json = await res.json();
       if (res.ok) {
-        markHealthy(model);
+        copilotHealthy = model === chain[0] ? null : { model, until: Date.now() + 10 * 60_000 };
         return json;
       }
       last = { status: res.status, message: json?.error?.message ?? `Gemini error ${res.status}` };
+      if (res.status === 400 || res.status === 404) break; // model or setting not available: try the next one
       if (!(res.status === 429 || res.status === 503)) throw Object.assign(new Error(last.message), { status: res.status });
-      await new Promise(r => setTimeout(r, 2500 * (attempt + 1)));
+      if (attempt === 0) await new Promise(r => setTimeout(r, 1500));
     }
   }
   throw Object.assign(new Error(last.message), { status: last.status });
