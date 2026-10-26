@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../lib/store';
 import { api, daysBetween, fmtDate, usd } from '../lib/api';
 import { Feed } from '../components/Feed';
-import { DelayComposer, RecoverButton } from '../components/DelayComposer';
+import { RecoverButton } from '../components/DelayComposer';
 import { Icon } from '../components/Icon';
 
 const pct = (a: number, b: number) => (b > 0 ? Math.max(0, Math.min(100, (a / b) * 100)) : 0);
@@ -242,12 +242,6 @@ function AgentCard() {
               ? `Air units ship pre-orders ${fmtDate(hero.keyDates.airLaunch)}; the rest of PO-1042 lands ${fmtDate(hero.keyDates.launch)}.`
               : `PO-1042 lands ${fmtDate(hero.keyDates?.launch)}. The recovery agent re-plans the moment a supplier reports a problem.`}
           </p>
-          <details>
-            <summary className="small strong" style={{ cursor: 'pointer' }}>Send a supplier message</summary>
-            <div style={{ marginTop: 12 }}>
-              <DelayComposer compact />
-            </div>
-          </details>
         </div>
       )}
     </div>

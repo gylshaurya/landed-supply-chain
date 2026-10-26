@@ -322,10 +322,10 @@ label.f { display: grid; gap: 7px; font-weight: 500; font-size: 13.5px; }
 .tl-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--line-2); font-size: 12.5px; color: var(--ink-2); }
 .tl-legend span { display: inline-flex; align-items: center; gap: 7px; }
 .tl-legend .tl-hint { margin-left: auto; color: var(--ink-3); }
-.seg { display: inline-flex; padding: 3px; background: var(--surface); border-radius: 11px; gap: 2px; }
-.seg button { border: 0; background: transparent; height: 30px; padding: 0 12px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: background 0.2s var(--ease), color 0.2s var(--ease); }
-.seg button:hover { color: var(--ink); }
-.seg button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(20, 20, 20, 0.08); }
+.segmented { display: inline-flex; padding: 3px; background: var(--surface); border-radius: 11px; gap: 2px; }
+.segmented button { border: 0; background: transparent; height: 30px; padding: 0 12px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; white-space: nowrap; transition: background 0.2s var(--ease), color 0.2s var(--ease); }
+.segmented button:hover { color: var(--ink); }
+.segmented button.on { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(20, 20, 20, 0.08); }
 .b-gantt .b-grid-row.b-grid-row-parent .b-grid-cell, .b-gantt .b-tree-parent-row .b-grid-cell { font-weight: 600; }
 .b-gantt .b-grid-header-text { font-weight: 500; color: var(--ink-3); }
 .b-bryntum { --b-widget-font-family: var(--font); }

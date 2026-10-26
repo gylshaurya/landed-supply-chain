@@ -37,13 +37,13 @@ export function Timeline() {
   return (
     <>
       <div className="tl-toolbar">
-        <div className="seg" role="group" aria-label="Purchase order">
+        <div className="segmented" role="group" aria-label="Purchase order">
           <button className={po === null ? 'on' : ''} onClick={() => pickPo(null)}>All</button>
           {state.purchaseOrders.map((o: any) => (
             <button key={o.id} className={po === o.id ? 'on' : ''} onClick={() => pickPo(o.id)}>{o.id}</button>
           ))}
         </div>
-        <div className="seg" role="group" aria-label="Zoom">
+        <div className="segmented" role="group" aria-label="Zoom">
           {(['days', 'weeks', 'months'] as TimelineView[]).map(v => (
             <button key={v} className={view === v ? 'on' : ''} onClick={() => pickView(v)}>{v[0].toUpperCase() + v.slice(1)}</button>
           ))}
