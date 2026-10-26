@@ -205,6 +205,11 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
                       'Show me every PayPal payment that is not paid yet',
                     ],
                     width: '28em',
+                    tools: {
+                      clearChat: { tooltip: 'Clear conversation' },
+                      settingsTool: { tooltip: 'Copilot settings' },
+                      close: { tooltip: 'Minimise' },
+                    },
                   },
                 },
                 tools: {

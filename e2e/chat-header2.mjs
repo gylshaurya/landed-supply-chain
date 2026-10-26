@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+const errs = []; p.on('pageerror', e => errs.push(e.message));
+await p.goto('http://localhost:5173/timeline', { waitUntil: 'networkidle' }); await p.waitForTimeout(2500);
+await p.locator('.b-chat-button').first().click(); await p.waitForTimeout(1200);
+const tool = p.locator(".b-chat-popup .b-tool[data-ref='clearChat']");
+await tool.hover(); await p.waitForTimeout(900);
+const header = p.locator('.b-chat-popup .b-panel-header').first(); const box = await header.boundingBox();
+await p.screenshot({ path: 'e2e/shots/chat-header2.png', clip: { x: box.x - 10, y: box.y - 10, width: box.width + 20, height: box.height + 90 } });
+console.log('tooltip:', await p.evaluate(() => [...document.querySelectorAll('.b-tooltip')].map(t => t.textContent.trim()).filter(Boolean).join(' | ')), 'errors:', errs.join('|'));
+await b.close();

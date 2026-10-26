@@ -351,6 +351,8 @@ label.f { display: grid; gap: 7px; font-weight: 500; font-size: 13.5px; }
 .b-time-ranges-header-canvas .b-sch-time-range.tr-bf { background: var(--apricot-soft) !important; color: var(--apricot-deep) !important; font-weight: 700; }
 .b-time-ranges-body-canvas .b-sch-time-range.tr-bf { background: repeating-linear-gradient(135deg, rgba(242, 166, 94, 0.12) 0 7px, transparent 7px 11px) !important; }
 .tt { line-height: 1.6; max-width: 340px; }
+/* Copilot: Bryntum's clear-chat tool uses a pencil icon that reads as "edit"; show a trash can instead. */
+.b-chat-popup .b-tool[data-ref='clearChat'] { --b-icon-rename: '\f1f8'; }
 
 /* ---------- supplier portal (same world as the dashboard) ---------- */
 .portal { min-height: 100%; background: var(--surface); }
