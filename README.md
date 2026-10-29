@@ -7,12 +7,19 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/ugll9fKP-gA"><b>Watch the film</b></a> ·
   <a href="https://landed-ilff.onrender.com"><b>Try it live</b></a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#features">Features</a> ·
   <a href="#the-ai-agents">The AI agents</a> ·
   <a href="#architecture">Architecture</a> ·
   <a href="#run-it-locally">Run it locally</a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/ugll9fKP-gA"><img src="https://img.youtube.com/vi/ugll9fKP-gA/maxresdefault.jpg" alt="Watch the Landed film on YouTube" width="80%"></a>
+  <br>
+  <sub>Watch the 3-minute film: one factory delay, fixed in one click.</sub>
 </p>
 
 ---
