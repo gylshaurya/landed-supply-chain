@@ -58,7 +58,7 @@ Here is what happens when a factory reports a delay.
 
 ```mermaid
 flowchart TD
-    A["Factory posts an update<br/><i>Kiln failed. 12 more days, or pay $1,800 overtime to save 5.</i>"] --> B["Landed reads the message<br/>and finds the affected task"]
+    A["Factory posts an update<br/>Kiln failed. 12 more days, or pay $1,800<br/>overtime to save 5."] --> B["Landed reads the message<br/>and finds the affected task"]
     B --> C["Recovery agent tests every option<br/>on the real schedule and sales forecast"]
     C --> D["Recovery plan in plain English<br/>Overtime + air-freight 160 units<br/>140 of 172 pre-orders on time, saves $2,979"]
     D --> E{"You approve"}
