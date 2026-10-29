@@ -37,7 +37,7 @@ function aiBudget(req: Request, res: Response, next: NextFunction) {
   const now = Date.now();
   const hits = (aiHits.get(ip) ?? []).filter(t => now - t < 3_600_000);
   if (hits.length >= AI_LIMIT) {
-    res.status(429).json({ success: false, error: 'Demo AI budget reached for this hour — try again later.' });
+    res.status(429).json({ success: false, error: 'Demo AI budget reached for this hour. Try again later.' });
     return;
   }
   hits.push(now);

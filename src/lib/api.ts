@@ -15,7 +15,7 @@ export const usd = (n: number, digits = 0) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: digits, minimumFractionDigits: digits });
 
 export const fmtDate = (d?: string, opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }) =>
-  d ? new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' }) : '—';
+  d ? new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' }) : '-';
 
 export const ago = (iso: string) => {
   const s = (Date.now() - Date.parse(iso)) / 1000;

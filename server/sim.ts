@@ -5,7 +5,7 @@ import { BLACK_FRIDAY, CYBER_MONDAY, PROJECT_START } from './seed/data.js';
 import type { DB, Dependency, OptionResult, Preorder, Product, Task } from './types.js';
 
 // ---------------------------------------------------------------------------
-// Demand model — deliberately simple and explainable so a merchant (and the
+// Demand model, deliberately simple and explainable so a merchant (and the
 // agent) can reason about it: baseline daily velocity × holiday seasonality.
 // When the product is out of stock, a share of demand converts to pre-orders
 // and the rest walks away.

@@ -6,7 +6,7 @@ import { AgentConsole } from './AgentConsole';
 import { Icon } from './Icon';
 
 export const SAMPLE_DELAY =
-  'Hello Kiln & Co team, very sorry — our second kiln had a heating element failure this week. Production of PO-1042 needs 12 more days. If you can pay $1,800 for overtime (weekend shifts + rented kiln time) we can save 5 days.';
+  'Hello Kiln & Co team, very sorry, our second kiln had a heating element failure this week. Production of PO-1042 needs 12 more days. If you can pay $1,800 for overtime (weekend shifts + rented kiln time) we can save 5 days.';
 
 /** Lets the merchant (or the supplier portal) post a supplier update and watch the agent respond. */
 export function DelayComposer({ poId = 'PO-1042', compact = false }: { poId?: string; compact?: boolean }) {

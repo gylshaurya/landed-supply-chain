@@ -93,7 +93,7 @@ export async function runQc(poId: string, photoPaths: string[], publicPaths: str
       balance.status = 'held';
       balance.holdReason = `QC ${result.verdict}: ${result.summary}`;
     }
-    log({ actor: 'agent', type: 'qc_fail', title: `${po.id} ${result.verdict === 'fail' ? 'failed QC — balance held' : 'needs human review'}`, detail: result.summary, link: '/payments' });
+    log({ actor: 'agent', type: 'qc_fail', title: `${po.id} ${result.verdict === 'fail' ? 'failed QC, balance held' : 'needs human review'}`, detail: result.summary, link: '/payments' });
     db.outbox.unshift({ id: newId(), ts: new Date().toISOString(), to: db.suppliers.find(s => s.id === po.supplierId)!.contact, subject: `QC result for ${po.id}`, body: result.supplierMessage, kind: 'supplier' });
   }
   save();
@@ -118,7 +118,7 @@ export async function handleSupplierUpdate(poId: string, message: string) {
   const parsed = await parseSupplierUpdate(db, poId, message);
   bus.emit('agent', { kind: 'parsed', text: `${parsed.kind === 'delay' ? `Delay detected: ${parsed.delayDays} days on ${parsed.affectedTaskId}` : 'No delay detected'}${parsed.offer ? ` · supplier offers ${parsed.offer.overtimeDays} days back for $${parsed.offer.overtimeCost.toLocaleString()}` : ''}`, parsed });
   if (parsed.kind !== 'delay' || parsed.delayDays <= 0) {
-    log({ actor: 'agent', type: 'parsed', title: 'Supplier update logged — no schedule impact', detail: parsed.reason });
+    log({ actor: 'agent', type: 'parsed', title: 'Supplier update logged: no schedule impact', detail: parsed.reason });
     bus.emit('agent', { kind: 'done', text: 'No action needed.' });
     save();
     return { proposal: null, parsed };
@@ -237,7 +237,7 @@ export async function approveProposal(id: string) {
     db.outbox.unshift({ id: newId(), ts: new Date().toISOString(), to: pre.email, subject: p.customerNotice.subject, body: renderNotice(p.customerNotice.body, vars), link: `/notice/${pre.noticeToken}`, kind: 'customer_notice' });
     notified++;
   }
-  logLines.push(notified ? `Sent ${notified} FTC-compliant delay notices with one-click keep / cancel-for-full-refund links.` : 'Every pre-order still ships on time — no customer notices needed.');
+  logLines.push(notified ? `Sent ${notified} FTC-compliant delay notices with one-click keep / cancel-for-full-refund links.` : 'Every pre-order still ships on time, so no customer notices are needed.');
   const newPromise = nextPromiseDate(db, product.id, afterTasks);
   if (newPromise !== product.promisedShipDate) {
     logLines.push(`Storefront promise for new pre-orders moved ${fmt(product.promisedShipDate)} → ${fmt(newPromise)}.`);
@@ -279,7 +279,7 @@ export async function createCheckout(productId: string, qty: number) {
   const ref = `pre-${newId()}`;
   const order = await paypal.createOrder({
     referenceId: ref,
-    description: `${product.name} — pre-order, ships by ${fmt(product.promisedShipDate)}`,
+    description: `${product.name} · pre-order, ships by ${fmt(product.promisedShipDate)}`,
     sku: product.sku,
     name: product.name,
     unitPrice: product.price,
@@ -330,7 +330,7 @@ export async function respondToNotice(token: string, choice: 'keep' | 'cancel') 
   const view = noticeView(token)!;
   pre.responseAt = new Date().toISOString();
   if (choice === 'cancel') {
-    const r = await paypal.refundCapture(pre.captureId ?? '', null, `Full refund for your Kiln & Co pre-order ${pre.id.toUpperCase()} — sorry for the delay.`, `refund-${pre.id}`);
+    const r = await paypal.refundCapture(pre.captureId ?? '', null, `Full refund for your Kiln & Co pre-order ${pre.id.toUpperCase()}. Sorry for the delay.`, `refund-${pre.id}`);
     pre.status = 'refunded';
     pre.refundId = r.id;
     log({ actor: 'customer', type: 'refund', title: `${pre.customerName} cancelled · full refund $${pre.amount}`, detail: `PayPal refund ${r.id}${r.simulated ? ' (simulated: seeded order)' : ''}.`, link: '/preorders' });
@@ -339,7 +339,7 @@ export async function respondToNotice(token: string, choice: 'keep' | 'cancel') 
     pre.promisedDate = pre.revisedDate ?? pre.promisedDate;
     let detail = `New ship date ${fmt(pre.promisedDate)}.`;
     if (view.goodwillCredit > 0) {
-      const r = await paypal.refundCapture(pre.captureId ?? '', view.goodwillCredit, `A $${view.goodwillCredit} thank-you for waiting — Kiln & Co`, `goodwill-${pre.id}`);
+      const r = await paypal.refundCapture(pre.captureId ?? '', view.goodwillCredit, `A $${view.goodwillCredit} thank-you for waiting, from Kiln & Co`, `goodwill-${pre.id}`);
       pre.goodwillRefundId = r.id;
       detail += ` $${view.goodwillCredit} goodwill credit refunded via PayPal (${r.id}).`;
     }

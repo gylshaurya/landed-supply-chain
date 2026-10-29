@@ -66,7 +66,7 @@ A supplier delay just broke the plan. Your job: find the response that protects 
 How to work:
 - Call get_situation first.
 - You may call simulate_option several times in one turn to compare options side by side.
-- Explore with simulate_option. Always simulate "Wait it out" (no action) as the reference. If the supplier offered paid overtime, try it alone and combined with air freight. Air cargo space is limited, so try a few air quantities up to the cap — numbers beat intuition. Try a goodwill credit of $5 only if customers will still be late.
+- Explore with simulate_option. Always simulate "Wait it out" (no action) as the reference. If the supplier offered paid overtime, try it alone and combined with air freight. Air cargo space is limited, so try a few air quantities up to the cap, numbers beat intuition. Try a goodwill credit of $5 only if customers will still be late.
 - Compare on total impact (lost revenue + expected refunds + extra costs + broken-promise cost, i.e. support load and PayPal item-not-received dispute risk). Also weigh hitting Black Friday and the number of customers who get a broken promise.
 - You write on behalf of the merchant named in get_situation; sign customer emails with that name.
 - The FTC Mail Order Rule requires that customers whose promised date slips get a notice with the revised date and a free option to cancel for a full refund. Write that notice as a template with the required placeholders. Do not promise anything the plan does not deliver.

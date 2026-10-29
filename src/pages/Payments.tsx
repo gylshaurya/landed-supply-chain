@@ -50,7 +50,7 @@ export function Payments() {
                     <span className={`badge cap ${PAY[p.status]}`}>{p.status}</span>
                     {p.holdReason && <div className="tiny muted" style={{ maxWidth: 260, marginTop: 4 }}>{p.holdReason}</div>}
                   </td>
-                  <td className="mono tiny">{p.payoutBatchId ?? (p.paidAt ? `paid ${fmtDate(p.paidAt)} (history)` : '—')}{p.simulated && p.payoutBatchId ? ' · simulated' : ''}</td>
+                  <td className="mono tiny">{p.payoutBatchId ?? (p.paidAt ? `paid ${fmtDate(p.paidAt)} (history)` : '-')}{p.simulated && p.payoutBatchId ? ' · simulated' : ''}</td>
                   <td className="r">
                     {p.status !== 'paid' && p.status !== 'processing' && (
                       <button className="btn sm" disabled={busy === p.id} onClick={() => release(p.id)}>
@@ -97,7 +97,7 @@ export function QcReportCard({ r }: { r: any }) {
           {r.checks.map((c: any) => (
             <div key={c.name} className={`check ${c.result === 'pass' ? 'ok' : 'no'}`}>
               <Icon name={c.result === 'pass' ? 'circle-check' : c.result === 'fail' ? 'circle-x' : 'help'} size={16} />
-              <span><b>{c.name}</b> — <span className="muted">{c.note}</span></span>
+              <span><b>{c.name}</b> · <span className="muted">{c.note}</span></span>
             </div>
           ))}
           {r.defects.length > 0 && (

@@ -10,7 +10,7 @@ class LandedTask extends TaskModel {
   static fields = [
     { name: 'kind', type: 'string', description: 'Task type: payment (PayPal supplier payment milestone), production, qc (AI quality inspection), freight, air, customs, warehouse, launch (pre-orders ship)' },
     { name: 'poId', type: 'string', description: 'Purchase order the task belongs to, e.g. PO-1042' },
-    { name: 'paymentStatus', type: 'string', description: 'For payment milestones: PayPal Payouts status — scheduled, held (blocked by failed QC), processing, paid, failed' },
+    { name: 'paymentStatus', type: 'string', description: 'For payment milestones: PayPal Payouts status: scheduled, held (blocked by failed QC), processing, paid, failed' },
     { name: 'amount', type: 'number', description: 'USD amount of the PayPal supplier payment milestone' },
     { name: 'paymentId', type: 'string' },
     { name: 'payoutBatchId', type: 'string', description: 'PayPal payout batch id once paid' },
@@ -158,7 +158,7 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
               `<b>${enc(taskRecord.name)}</b>`,
               enc(`${DateHelper.format(taskRecord.startDate, 'ddd MMM D')} → ${DateHelper.format(taskRecord.endDate, 'ddd MMM D')} · ${taskRecord.duration} days`),
               taskRecord.note ? `<i>${enc(taskRecord.note)}</i>` : '',
-              taskRecord.kind === 'payment' ? enc(`PayPal payout: ${usd(taskRecord.amount)} — ${taskRecord.paymentStatus}${taskRecord.payoutBatchId ? ` (${taskRecord.payoutBatchId})` : ''}`) : '',
+              taskRecord.kind === 'payment' ? enc(`PayPal payout: ${usd(taskRecord.amount)} · ${taskRecord.paymentStatus}${taskRecord.payoutBatchId ? ` (${taskRecord.payoutBatchId})` : ''}`) : '',
               taskRecord.critical ? '<b style="color:#dc2626">On the critical path</b>' : '',
             ];
             return `<div class="tt">${lines.filter(Boolean).join('<br>')}</div>`;

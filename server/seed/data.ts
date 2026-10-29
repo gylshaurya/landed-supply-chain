@@ -46,7 +46,7 @@ function t(task: Partial<Task> & Pick<Task, 'id' | 'poId' | 'name' | 'kind' | 'd
 export function buildSeed(): DB {
   const supplierEmail = config.paypal.supplierEmail || 'supplier-sandbox@example.com';
   const tasks: Task[] = [
-    // PO-1042 — the hero shipment
+    // PO-1042, the hero shipment
     t({ id: 'g-1042', poId: 'PO-1042', name: 'PO-1042 · Pour-over set × 1,200 · Jingdezhen → Long Beach', kind: 'group', duration: 0 }),
     t({ id: '1042-deposit', poId: 'PO-1042', parentId: 'g-1042', name: '30% deposit to Hongye Glassworks', kind: 'payment', duration: 0, manual: true, start: '2026-09-21', percentDone: 100, paymentId: 'pay-1042-dep', resourceId: 'r-merchant' }),
     t({ id: '1042-prod', poId: 'PO-1042', parentId: 'g-1042', name: 'Production run · glass blowing & annealing', kind: 'production', duration: 42, manual: true, start: '2026-09-22', percentDone: 70, resourceId: 'r-factory' }),
@@ -58,7 +58,7 @@ export function buildSeed(): DB {
     t({ id: '1042-wh', poId: 'PO-1042', parentId: 'g-1042', name: 'Drayage & warehouse receiving', kind: 'warehouse', duration: 2, resourceId: 'r-wh' }),
     t({ id: '1042-launch', poId: 'PO-1042', parentId: 'g-1042', name: 'Ship pre-orders · restock goes live', kind: 'launch', duration: 0, resourceId: 'r-wh' }),
 
-    // PO-1043 — linen aprons, on the water and on time
+    // PO-1043, linen aprons, on the water and on time
     t({ id: 'g-1043', poId: 'PO-1043', name: 'PO-1043 · Linen apron × 600 · Porto → Newark', kind: 'group', duration: 0 }),
     t({ id: '1043-deposit', poId: 'PO-1043', parentId: 'g-1043', name: '50% deposit to Tecelagem Ribeira', kind: 'payment', duration: 0, manual: true, start: '2026-08-28', percentDone: 100, paymentId: 'pay-1043-dep', resourceId: 'r-merchant' }),
     t({ id: '1043-prod', poId: 'PO-1043', parentId: 'g-1043', name: 'Weaving & sewing', kind: 'production', duration: 34, manual: true, start: '2026-08-29', percentDone: 100, resourceId: 'r-porto' }),
@@ -69,7 +69,7 @@ export function buildSeed(): DB {
     t({ id: '1043-wh', poId: 'PO-1043', parentId: 'g-1043', name: 'Warehouse receiving', kind: 'warehouse', duration: 2, resourceId: 'r-wh' }),
     t({ id: '1043-launch', poId: 'PO-1043', parentId: 'g-1043', name: 'Restock goes live', kind: 'launch', duration: 0, resourceId: 'r-wh' }),
 
-    // PO-1044 — domestic walnut scoops, pay on delivery
+    // PO-1044, domestic walnut scoops, pay on delivery
     t({ id: 'g-1044', poId: 'PO-1044', name: 'PO-1044 · Walnut scoop × 400 · Eugene, OR → Ontario, CA', kind: 'group', duration: 0 }),
     t({ id: '1044-prod', poId: 'PO-1044', parentId: 'g-1044', name: 'Turning & oil finish', kind: 'production', duration: 25, manual: true, start: '2026-10-12', percentDone: 45, resourceId: 'r-oregon' }),
     t({ id: '1044-qc', poId: 'PO-1044', parentId: 'g-1044', name: 'Photo QC (AI-verified)', kind: 'qc', duration: 1, resourceId: 'r-qc' }),
@@ -91,7 +91,7 @@ export function buildSeed(): DB {
     version: 1,
     merchant: { name: 'Kiln & Co', email: 'ops@kilnandco.example' },
     products: [
-      { id: 'pour-over', name: 'Glass Pour-Over Set', sku: 'KC-POS-01', price: 68, image: '/samples/product-pour-over.jpg', stockOnHand: 0, dailyVelocity: 7, promisedShipDate: '2026-11-26', preorderOpen: true, blurb: 'Hand-blown borosilicate glass dripper with a 600 ml glass server. Our best-seller — sold out until the next batch lands.' },
+      { id: 'pour-over', name: 'Glass Pour-Over Set', sku: 'KC-POS-01', price: 68, image: '/samples/product-pour-over.jpg', stockOnHand: 0, dailyVelocity: 7, promisedShipDate: '2026-11-26', preorderOpen: true, blurb: 'Hand-blown borosilicate glass dripper with a 600 ml glass server. Our best-seller, sold out until the next batch lands.' },
       { id: 'apron', name: 'Canvas Barista Apron', sku: 'KC-APR-02', price: 42, image: '/samples/product-apron.jpg', stockOnHand: 22, dailyVelocity: 3, promisedShipDate: '2026-10-31', preorderOpen: false, blurb: 'Heavy black cotton canvas with a leather patch and tool pockets.' },
       { id: 'scoop', name: 'Walnut Coffee Scoop', sku: 'KC-SCP-03', price: 18, image: '/samples/product-scoop.jpg', stockOnHand: 64, dailyVelocity: 4, promisedShipDate: '2026-11-12', preorderOpen: false, blurb: 'Hand-turned Oregon black walnut, one level scoop = 12 g.' },
     ],
@@ -135,8 +135,8 @@ export function buildSeed(): DB {
       { id: 'r-factory', name: 'Hongye Glassworks', role: 'Factory', country: 'China' },
       { id: 'r-porto', name: 'Tecelagem Ribeira', role: 'Factory', country: 'Portugal' },
       { id: 'r-oregon', name: 'Cascade Woodworks', role: 'Workshop', country: 'USA' },
-      { id: 'r-qc', name: 'Landed QC agent', role: 'Inspection', country: '—' },
-      { id: 'r-forwarder', name: 'BlueLine Forwarding', role: 'Freight forwarder', country: '—' },
+      { id: 'r-qc', name: 'Landed QC agent', role: 'Inspection', country: '-' },
+      { id: 'r-forwarder', name: 'BlueLine Forwarding', role: 'Freight forwarder', country: '-' },
       { id: 'r-customs', name: 'Customs broker', role: 'Customs', country: 'USA' },
       { id: 'r-wh', name: 'Ontario, CA warehouse', role: 'Warehouse', country: 'USA' },
     ],

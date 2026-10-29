@@ -113,7 +113,7 @@ export function Store() {
   if (!state || !product) return <div className="standalone shop"><div className="standalone-body empty">Loading…</div></div>;
   return (
     <div className="standalone shop">
-      {mode !== 'sandbox' && <div className="demo-banner">PayPal is in simulated mode — add sandbox credentials to .env for real PayPal checkout.</div>}
+      {mode !== 'sandbox' && <div className="demo-banner">PayPal is in simulated mode. Add sandbox credentials to .env for real PayPal checkout.</div>}
       <div className="standalone-top">
         <span className="serif" style={{ fontSize: 24 }}>Kiln & Co</span>
         <span className="muted small">Slow coffee, made by hand</span>
@@ -161,7 +161,7 @@ export function Store() {
             {status.kind === 'error' && <div className="badge red" style={{ whiteSpace: 'normal' }}>{status.text}</div>}
             {status.kind === 'done' && (
               <div className="hero-alert good">
-                <b>Pre-order confirmed — thank you, {status.pre.customerName.split(' ')[0]}!</b>
+                <b>Pre-order confirmed. Thank you, {status.pre.customerName.split(' ')[0]}!</b>
                 <span className="small">Paid {usd(status.pre.amount)} with PayPal · capture <span className="mono">{status.pre.captureId}</span>. Ships by {fmtDate(status.pre.promisedDate, { month: 'long', day: 'numeric' })}.</span>
               </div>
             )}

@@ -91,7 +91,7 @@ function SalesCard() {
       <div className="hero-main">
         <div className="hero-head">
           <div>
-            <div className="hero-figure">{data ? usd(total) : '—'}</div>
+            <div className="hero-figure">{data ? usd(total) : '…'}</div>
             <div className="card-sub" style={{ marginTop: 6 }}>Projected sales to Dec 31 under the current plan</div>
           </div>
           <select className="select-pill" value={productId} onChange={e => setProductId(e.target.value)} aria-label="Product">
@@ -162,7 +162,7 @@ function SalesCard() {
         </div>
         <div className="stat">
           <div className="label">Lost while sold out</div>
-          <div className="value">{data ? usd(data.totals.lost) : '—'}</div>
+          <div className="value">{data ? usd(data.totals.lost) : '…'}</div>
           <div className="foot"><Icon name="arrow-down" size={15} className="down" /><span className="down">forecast</span> to Dec 31</div>
         </div>
       </div>

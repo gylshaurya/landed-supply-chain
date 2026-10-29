@@ -65,7 +65,7 @@ export function Notice() {
                 <span>{usd(p.amount)} is on its way back to your PayPal account. PayPal refund reference <span className="mono">{p.refundId}</span>.</span>
               </div>
             )}
-            {p.status === 'shipped' && <div className="hero-alert good"><b>Good news — it already shipped!</b><span>Tracking {p.trackingNumber}</span></div>}
+            {p.status === 'shipped' && <div className="hero-alert good"><b>Good news, it already shipped!</b><span>Tracking {p.trackingNumber}</span></div>}
           </div>
         </div>
         <p className="muted tiny" style={{ marginTop: 12, textAlign: 'center' }}>Sent under the FTC Mail Order Rule: you were told before the original date and offered a free, full refund.</p>

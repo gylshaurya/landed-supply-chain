@@ -80,7 +80,7 @@ async function generate(params: Omit<Parameters<GoogleGenAI['models']['generateC
         if (!retryable(e)) throw e;
         const hinted = /retry in ([\d.]+)s/i.exec((e as Error).message)?.[1];
         const wait = hinted ? Math.min(30_000, Math.ceil(Number(hinted) * 1000) + 500) : 2500 * (attempt + 1);
-        console.warn(`[gemini] ${label} on ${model}: ${(e as ApiError).status ?? 'error'} — ${attempt + 1 < attempts ? `retrying in ${Math.round(wait / 1000)}s` : 'trying next model'}`);
+        console.warn(`[gemini] ${label} on ${model}: ${(e as ApiError).status ?? 'error'}, ${attempt + 1 < attempts ? `retrying in ${Math.round(wait / 1000)}s` : 'trying next model'}`);
         if (attempt + 1 < attempts) await sleep(wait);
       }
     }
@@ -127,10 +127,18 @@ export function geminiSchema(schema: z.ZodType): Record<string, unknown> {
   return clean(json) as Record<string, unknown>;
 }
 
+/** House style for anything shown to people: no em dashes. Rewrites them in every string of a JSON value. */
+export function dedash<T>(v: T): T {
+  if (typeof v === 'string') return v.replace(/\s*\u2014\s*/g, ', ').replace(/,\s*,/g, ',') as T;
+  if (Array.isArray(v)) return v.map(dedash) as T;
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, dedash(x)])) as T;
+  return v;
+}
+
 /** One call whose answer must validate against `schema`. */
 export async function structured<S extends z.ZodType>(opts: { schema: S; system: string; content: InputPart[] | string; effort?: Effort }): Promise<z.infer<S>> {
   if (aiProvider() === 'anthropic') {
-    return claudeStructured({ schema: opts.schema, system: opts.system, content: toClaudeContent(opts.content) as never, effort: opts.effort });
+    return dedash(await claudeStructured({ schema: opts.schema, system: opts.system, content: toClaudeContent(opts.content) as never, effort: opts.effort }));
   }
   const res = await generate(
     {
@@ -146,7 +154,7 @@ export async function structured<S extends z.ZodType>(opts: { schema: S; system:
   );
   const text = res.text ?? '';
   if (!text) throw new AIRefusal(`Gemini returned no output (finish reason: ${res.candidates?.[0]?.finishReason ?? 'unknown'})`);
-  const parsed = opts.schema.safeParse(JSON.parse(text));
+  const parsed = opts.schema.safeParse(dedash(JSON.parse(text)));
   if (!parsed.success) throw new Error(`Gemini output did not match the schema: ${parsed.error.message.slice(0, 300)}`);
   return parsed.data;
 }
@@ -164,7 +172,7 @@ export async function runToolAgent(opts: { system: string; prompt: string; tools
       max_iterations: max,
       system: opts.system,
       output_config: { effort: 'medium' },
-      tools: opts.tools.map(t => betaZodTool({ name: t.name, description: t.description, inputSchema: t.schema, run: input => t.run(input) })),
+      tools: opts.tools.map(t => betaZodTool({ name: t.name, description: t.description, inputSchema: t.schema, run: input => t.run(dedash(input)) })),
       messages: [{ role: 'user', content: opts.prompt }],
       ...FALLBACK,
     });
@@ -201,8 +209,8 @@ export async function runToolAgent(opts: { system: string; prompt: string; tools
       let result: string;
       if (!t) result = `Error: unknown tool ${call.name}`;
       else {
-        const parsed = t.schema.safeParse(call.args ?? {});
-        result = parsed.success ? await t.run(parsed.data) : `Error: invalid arguments — ${parsed.error.message.slice(0, 300)}`;
+        const parsed = t.schema.safeParse(dedash(call.args ?? {}));
+        result = parsed.success ? await t.run(parsed.data) : `Error: invalid arguments, ${parsed.error.message.slice(0, 300)}`;
       }
       responses.push({ functionResponse: { id: call.id, name: call.name, response: { result } } });
     }

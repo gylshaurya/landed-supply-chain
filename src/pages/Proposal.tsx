@@ -32,7 +32,7 @@ export function ProposalPage() {
     try {
       const r = await api(`/api/proposals/${id}/approve`, { method: 'POST' });
       setP(r);
-      toast('Plan approved — schedule, PayPal payments and customer notices updated.');
+      toast('Plan approved: schedule, PayPal payments and customer notices updated.');
     } finally {
       setBusy(false);
     }
@@ -55,7 +55,7 @@ export function ProposalPage() {
         <blockquote style={{ margin: 0, padding: '10px 14px', borderLeft: '3px solid #f59e0b', background: '#fff', borderRadius: 8 }} className="small">
           “{p.trigger.message}”
           <div className="muted tiny" style={{ marginTop: 6 }}>
-            Understood as: +{p.trigger.delayDays} days on production — {p.trigger.reason}
+            Understood as: +{p.trigger.delayDays} days on production · {p.trigger.reason}
             {p.trigger.supplierOffer ? ` · offer: ${p.trigger.supplierOffer.overtimeDays} days back for ${usd(p.trigger.supplierOffer.overtimeCost)}` : ''}
           </div>
         </blockquote>
@@ -112,7 +112,7 @@ export function ProposalPage() {
                 <td className="r num">{usd(o.brokenPromiseCost ?? 0)}</td>
                 <td className="r num strong">{usd(o.totalImpact)}</td>
                 <td className="r num" style={{ color: o.totalImpact < wait.totalImpact ? '#15803d' : undefined }}>
-                  {o === wait ? '—' : `${o.totalImpact < wait.totalImpact ? '−' : '+'}${usd(Math.abs(wait.totalImpact - o.totalImpact))}`}
+                  {o === wait ? 'baseline' : `${o.totalImpact < wait.totalImpact ? '−' : '+'}${usd(Math.abs(wait.totalImpact - o.totalImpact))}`}
                 </td>
               </tr>
             ))}

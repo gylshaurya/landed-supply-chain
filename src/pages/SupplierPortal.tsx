@@ -192,7 +192,7 @@ export function SupplierPortal() {
               <textarea className="input" value={msg} onChange={e => setMsg(e.target.value)} rows={4} />
               <div className="row">
                 <button className="btn primary" onClick={sendUpdate} disabled={!!sent && !ack}><Icon name="send" size={16} /> Send update</button>
-                {!!sent && !ack && <span className="muted small"><Icon name="spinner" spin size={15} /> Delivered — {state?.merchant.name} is re-planning…</span>}
+                {!!sent && !ack && <span className="muted small"><Icon name="spinner" spin size={15} /> Delivered. {state?.merchant.name} is re-planning…</span>}
                 {ack && <span className="badge green">{state?.merchant.name} has been notified and will reply shortly.</span>}
               </div>
             </div>

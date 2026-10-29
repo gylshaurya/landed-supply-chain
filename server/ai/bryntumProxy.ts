@@ -1,5 +1,6 @@
 import { aiMode, aiProvider, config } from '../config.js';
 import { anthropic, FALLBACK } from './client.js';
+import { dedash } from './llm.js';
 
 // Backend for Bryntum's built-in AI feature (AnthropicPlugin). The plugin sends
 // a Messages API body; we pin the model, strip parameters the current model
@@ -54,7 +55,7 @@ async function geminiPrompt(body: Body) {
       const json = await res.json();
       if (res.ok) {
         copilotHealthy = model === chain[0] ? null : { model, until: Date.now() + 10 * 60_000 };
-        return json;
+        return dedash(json);
       }
       last = { status: res.status, message: json?.error?.message ?? `Gemini error ${res.status}` };
       if (res.status === 400 || res.status === 404) break; // model or setting not available: try the next one

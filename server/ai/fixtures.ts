@@ -1,6 +1,6 @@
-// Demo-mode stand-ins used only when no ANTHROPIC_API_KEY is configured, so
-// judges can click through the full flow offline. Every screen that shows
-// demo output is labelled "Demo AI". With a key, the real agents run.
+// Recorded answers used when no AI key is configured, so the whole app works
+// offline. Screens that show them are labelled "Demo AI". With a key, the real
+// agents run.
 
 import { fmt } from '../dates.js';
 import { BLACK_FRIDAY } from '../seed/data.js';
@@ -68,7 +68,7 @@ export function demoRecovery(db: DB, poId: string, update: SupplierUpdate, simul
     rationale: `Waiting pushes every pre-order to ${fmt(wait.firstShipDate)}, after Black Friday (${fmt(BLACK_FRIDAY)}), breaking ${wait.preordersLate} promises and losing an estimated $${wait.lostRevenue.toLocaleString()} in sales. ${best.label} costs $${(best.airCost + best.overtimeCost).toLocaleString()} up front but ships the first units ${fmt(best.firstShipDate)}, so ${best.preordersLate === 0 ? 'no pre-order customer gets a broken promise' : `${best.preordersLate} customers are late`} and Black Friday demand is covered. The remaining units follow by sea on ${fmt(best.fullRestockDate)}.`,
     customerNoticeSubject: 'An update on your Kiln & Co pre-order',
     customerNoticeBody:
-      'Hi {{name}},\n\nOur glassworks partner hit a production delay, so your pour-over set (order {{order_id}}) will ship on {{revised_date}} instead of {{original_date}}. We are sorry — we would rather tell you now than surprise you later.\n\nYou have two options:\n• Keep your order — no action needed, or confirm here: {{keep_link}}\n• Cancel at no cost with one click for a full refund to your PayPal account: {{cancel_link}}\n\nThank you for your patience,\nThe Kiln & Co team',
+      'Hi {{name}},\n\nOur glassworks partner hit a production delay, so your pour-over set (order {{order_id}}) will ship on {{revised_date}} instead of {{original_date}}. We are sorry. We would rather tell you now than surprise you later.\n\nYou have two options:\n• Keep your order: no action needed, or confirm here: {{keep_link}}\n• Cancel at no cost with one click for a full refund to your PayPal account: {{cancel_link}}\n\nThank you for your patience,\nThe Kiln & Co team',
     supplierMessage: best.overtimeDays
       ? `Approved: please run the overtime shifts (+$${best.overtimeCost.toLocaleString()}) and pack the first ${best.airUnits} sets for air freight as soon as QC passes.`
       : `Understood. Please pack the first ${best.airUnits} sets for air freight as soon as QC passes.`,
@@ -113,7 +113,7 @@ export function demoQc(photos: string[]): Omit<QcReport, 'id' | 'poId' | 'create
       ],
       defects: [],
       estimatedDefectRatePct: 0.8,
-      supplierMessage: 'Batch passed inspection — releasing the balance payment now. Thank you!',
+      supplierMessage: 'Batch passed inspection. Releasing the balance payment now. Thank you!',
     };
   }
   return {
@@ -123,6 +123,6 @@ export function demoQc(photos: string[]): Omit<QcReport, 'id' | 'poId' | 'create
     checks: [],
     defects: [],
     estimatedDefectRatePct: 0,
-    supplierMessage: 'Thanks — a team member will review these photos.',
+    supplierMessage: 'Thanks, a team member will review these photos.',
   };
 }

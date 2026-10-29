@@ -17,7 +17,7 @@ step('reset');
 
 // 1. Supplier delay → agent → proposal
 await page.goto(base + '/', { waitUntil: 'networkidle' });
-await fetch(`${base}/api/supplier/PO-1042/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Hello Kiln & Co team, very sorry — our second kiln had a heating element failure this week. Production of PO-1042 needs 12 more days. If you can pay $1,800 for overtime (weekend shifts + rented kiln time) we can save 5 days.' }) });
+await fetch(`${base}/api/supplier/PO-1042/update`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Hello Kiln & Co team, very sorry, our second kiln had a heating element failure this week. Production of PO-1042 needs 12 more days. If you can pay $1,800 for overtime (weekend shifts + rented kiln time) we can save 5 days.' }) });
 await page.getByText('Review recovery plan').first().waitFor({ timeout: 240_000 });
 step('proposal ready');
 await shot('flow-1-agent');
