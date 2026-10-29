@@ -2,7 +2,7 @@
   "name": "landed",
   "version": "0.1.0",
   "private": true,
-  "description": "Landed - a self-healing supply chain for online stores, built on PayPal + Bryntum + Claude",
+  "description": "Landed: the self-healing supply chain for online stores",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -17,7 +17,7 @@
     "seed": "tsx server/scripts/seed.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "e2e": "node e2e/flow.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",
