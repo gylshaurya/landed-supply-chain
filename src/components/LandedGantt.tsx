@@ -151,12 +151,18 @@ export const LandedGantt = forwardRef<GanttHandle, Props>(function LandedGantt(p
           },
         },
         taskTooltip: {
-          template: ({ taskRecord }: any) => StringHelper.xss`
-            <div class="tt"><b>${taskRecord.name}</b><br>
-            ${DateHelper.format(taskRecord.startDate, 'ddd MMM D')} → ${DateHelper.format(taskRecord.endDate, 'ddd MMM D')} · ${taskRecord.duration} days<br>
-            ${taskRecord.note ? `<i>${taskRecord.note}</i><br>` : ''}
-            ${taskRecord.kind === 'payment' ? `PayPal payout: ${usd(taskRecord.amount)} — ${taskRecord.paymentStatus}${taskRecord.payoutBatchId ? ` (${taskRecord.payoutBatchId})` : ''}` : ''}
-            ${taskRecord.critical ? '<br><b style="color:#dc2626">On the critical path</b>' : ''}</div>`,
+          // xss`` escapes every interpolation, so nested markup is built from encoded parts instead
+          template: ({ taskRecord }: any) => {
+            const enc = StringHelper.encodeHtml;
+            const lines = [
+              `<b>${enc(taskRecord.name)}</b>`,
+              enc(`${DateHelper.format(taskRecord.startDate, 'ddd MMM D')} → ${DateHelper.format(taskRecord.endDate, 'ddd MMM D')} · ${taskRecord.duration} days`),
+              taskRecord.note ? `<i>${enc(taskRecord.note)}</i>` : '',
+              taskRecord.kind === 'payment' ? enc(`PayPal payout: ${usd(taskRecord.amount)} — ${taskRecord.paymentStatus}${taskRecord.payoutBatchId ? ` (${taskRecord.payoutBatchId})` : ''}`) : '',
+              taskRecord.critical ? '<b style="color:#dc2626">On the critical path</b>' : '',
+            ];
+            return `<div class="tt">${lines.filter(Boolean).join('<br>')}</div>`;
+          },
         },
         taskMenu: {
           items: {
