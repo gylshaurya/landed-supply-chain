@@ -259,6 +259,7 @@ flowchart LR
 | AI | Google Gemini via `@google/genai`, Zod for structured output (Claude optional) |
 | Payments | PayPal JS SDK v6, Orders v2, Payments v2, Payouts |
 | Tests | Vitest for the scheduler, simulator and full approve flow, Playwright for browser runs |
+| Hosting | Render (web service from the included blueprint) |
 
 ## Run it locally
 
@@ -289,6 +290,14 @@ Other commands:
 npm test                      # unit and flow tests
 npm run build && npm start    # production build on $PORT
 ```
+
+## Deploy
+
+The live app runs on [Render](https://render.com). The repo includes a `render.yaml` blueprint, so deploying your own copy takes a few steps:
+
+1. In Render, choose **New > Blueprint** and pick this repo.
+2. Add your `GEMINI_API_KEY` and PayPal sandbox keys when Render asks for them.
+3. Render builds the app with `npm run build` and starts it with `npm start`. The health check is `/api/state`.
 
 ## Project layout
 
